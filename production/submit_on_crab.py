@@ -107,7 +107,7 @@ if __name__ == '__main__':
             'globalTag=%s' % globaltag,
         ]
         
-        config.JobType.outputFiles = ['_'.join(['yau3muNANO', 'mc' if isMC else 'data', production_tag])+'.root']
+        config.JobType.outputFiles = ['_'.join(['tau3muNANO', 'mc' if isMC else 'data', production_tag])+'.root']
 
         print()
         print(config)
