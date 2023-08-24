@@ -28,5 +28,7 @@ git fetch crovelli
 ```
 
 ## compile
+```
 cd ../../
 scramv1 b
+```
