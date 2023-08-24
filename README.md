@@ -25,6 +25,7 @@ git checkout -b myBranch origin/myBranch
 ```
 git remote add crovelli git@github.com:crovelli/Tau3muNANO.git
 git fetch crovelli
+#git checkout -b devChiara crovelli/master
 ```
 
 ## compile
