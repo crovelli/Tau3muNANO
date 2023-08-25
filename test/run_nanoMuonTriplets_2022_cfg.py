@@ -39,8 +39,8 @@ options.register('skip', 0,
     "skip first N events"
 )
 
-#options.setDefault('maxEvents', -1)
-options.setDefault('maxEvents', 1000)
+options.setDefault('maxEvents', -1)
+#options.setDefault('maxEvents', 1000)
 tag = 'prova' if options.isPreECALleakage else 'provaECALleak'
 options.setDefault('tag', tag)
 options.parseArguments()
@@ -60,7 +60,7 @@ if options._beenSet['globalTag']:
     globaltag = options.globalTag
 
 extension = {False : 'data', True : 'mc'}
-outputFileNANO = cms.untracked.string('_'.join(['xNANO', extension[options.isMC], options.tag])+'.root')
+outputFileNANO = cms.untracked.string('_'.join(['tau3muNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['xFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles :
     if options.isMC :
@@ -80,7 +80,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load('PhysicsTools.XNano.nanoTau3Mu_cff')
+process.load('PhysicsTools.Tau3muNANO.nanoTau3Mu_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -133,7 +133,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
-from PhysicsTools.XNano.nanoTau3Mu_cff import *
+from PhysicsTools.Tau3muNANO.nanoTau3Mu_cff import *
 process = nanoAOD_customizeMuonTriggerTau3Mu(process)
 process = nanoAOD_customizeWnuTau3Mu(process)
 process = nanoAOD_customizeTriggerBitsTau3Mu(process)
@@ -143,7 +143,7 @@ process.nanoAOD_TauTo3mu_step = cms.Path(process.nanoSequence + process.nanoWnuT
 
 # customisation of the process.
 if options.isMC:
-    from PhysicsTools.XNano.nanoTau3Mu_cff import nanoAOD_customizeMC
+    from PhysicsTools.Tau3muNANO.nanoTau3Mu_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
