@@ -150,25 +150,28 @@ DEFINE_FWK_MODULE(TauPlusMETBuilder);
 
 std::pair<double, double> TauPlusMETBuilder::longMETsolutions(TLorentzVector& metP4, TLorentzVector & TriMuP4) const{
 
+    bool verbose = false;
     double min_missPz = -999 , max_missPz = -999;
     double A = 0.5 * ( W_MASS*W_MASS - TriMuP4.M()*TriMuP4.M() ) + TriMuP4.Px()*metP4.Px() + TriMuP4.Py()*metP4.Py();
 
     double denom = TriMuP4.E()*TriMuP4.E() - TriMuP4.Pz()*TriMuP4.Pz();
     double a = 1.;
-    double b = A*TriMuP4.P()/denom;
+    double b = A*TriMuP4.Pz()/denom;
     double c = (TriMuP4.E()*TriMuP4.E()*metP4.Pt()*metP4.Pt() - A*A)/denom;
 
     double delta = b*b - a*c; // already removed factor 2
     if (delta > 0){
         delta = std::sqrt(delta);
-        min_missPz = (b - delta)/a;
-        max_missPz = (b + delta)/a;
+        min_missPz = fabs((b - delta)/a) < fabs((b + delta)/a) ? (b - delta)/a : (b + delta)/a;
+        max_missPz = fabs((b - delta)/a) > fabs((b + delta)/a) ? (b - delta)/a : (b + delta)/a;
     }
     
-    std::cout << " --- solve long missing energy ----" << std::endl;
-    std::cout << "  Delta \t b \t c" << std::endl;
-    std::cout << "  " << delta << "\t" <<  b << "\t" <<  c << std::endl;
-    std::cout << " ----------------------------------" << std::endl;
+    if(verbose){
+       std::cout << " --- solve long missing energy ----" << std::endl;
+       std::cout << "  Delta \t b \t c" << std::endl;
+       std::cout << "  " << delta << "\t" <<  b << "\t" <<  c << std::endl;
+       std::cout << " ----------------------------------" << std::endl;
+    }
     return  std::make_pair(min_missPz, max_missPz);
 
 }//longMETsolutions()
