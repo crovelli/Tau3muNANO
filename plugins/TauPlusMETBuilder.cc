@@ -81,12 +81,12 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
     for(const pat::CompositeCandidate &tau : *tau_cands){
         // pick the Tau candidate
         TLorentzVector tauCandP4;
-        if ( tau.hasUserFloat("fitted_vc_pt")&&tau.hasUserFloat("fitted_vc_eta")&&tau.hasUserFloat("fitted_vc_phi")&&tau.hasUserFloat("fitted_vc_mass")  ){
+        if ( tau.hasUserFloat("fitted_pt")&&tau.hasUserFloat("fitted_eta")&&tau.hasUserFloat("fitted_phi")&&tau.hasUserFloat("fitted_mass")  ){
             if (debug) std::cout << " tau has all the kimetics .. OK" << std::endl;
-            tauCandP4.SetPtEtaPhiM( tau.userFloat("fitted_vc_pt"),
-                                    tau.userFloat("fitted_vc_eta"),
-                                    tau.userFloat("fitted_vc_phi"),
-                                    tau.userFloat("fitted_vc_mass") );
+            tauCandP4.SetPtEtaPhiM( tau.userFloat("fitted_pt"),
+                                    tau.userFloat("fitted_eta"),
+                                    tau.userFloat("fitted_phi"),
+                                    tau.userFloat("fitted_mass") );
         }else{
             std::cout << " [ERROR] tau candidate is fault..." << std::endl;
         }
@@ -109,18 +109,27 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
         std::pair<double,double> PuppiMET_missPz(longMETsolutions(PuppiMetP4,tauCandP4));
         std::pair<double,double> DeepMET_missPz(longMETsolutions(DeepMetP4,tauCandP4));
 
+        // Tau candidate transverse mass
+        float Tau_mT = std::sqrt(2. * tauCandP4.Perp()* MetP4.Pt() * (1 - std::cos(tauCandP4.Phi()-MetP4.Phi())));
+        float Tau_Puppi_mT = std::sqrt(2. * tauCandP4.Perp()* PuppiMetP4.Pt() * (1 - std::cos(tauCandP4.Phi()-PuppiMetP4.Phi())));
+        float Tau_Deep_mT = std::sqrt(2. * tauCandP4.Perp()* DeepMetP4.Pt() * (1 - std::cos(tauCandP4.Phi()-DeepMetP4.Phi())));
+
+
         // save variables
         TauPlusMET.addUserInt("charge", TauPlusMET.charge());
         // PF MET type1 correction
         TauPlusMET.addUserFloat("MET_pt", met.pt()),
+        TauPlusMET.addUserFloat("Tau_mT", Tau_mT),
         TauPlusMET.addUserFloat("METminPz", MET_missPz.first);
         TauPlusMET.addUserFloat("METmaxPz", MET_missPz.second);
         // Puppi correction
         TauPlusMET.addUserFloat("PuppiMET_pt", PuppiMet.pt()),
+        TauPlusMET.addUserFloat("Tau_Puppi_mT", Tau_Puppi_mT),
         TauPlusMET.addUserFloat("PuppiMETminPz", PuppiMET_missPz.first);
         TauPlusMET.addUserFloat("PuppiMETmaxPz", PuppiMET_missPz.second);
         // DeepMET correction
         TauPlusMET.addUserFloat("DeepMET_pt", met.corPt(DeepMETcorr)),
+        TauPlusMET.addUserFloat("Tau_Deep_mT", Tau_Deep_mT),
         TauPlusMET.addUserFloat("DeepMETminPz", DeepMET_missPz.first);
         TauPlusMET.addUserFloat("DeepMETmaxPz", DeepMET_missPz.second);
         // Tau + MET ~ W candidate
@@ -160,11 +169,9 @@ std::pair<double, double> TauPlusMETBuilder::longMETsolutions(TLorentzVector& me
     double c = (TriMuP4.E()*TriMuP4.E()*metP4.Pt()*metP4.Pt() - A*A)/denom;
 
     double delta = b*b - a*c; // already removed factor 2
-    if (delta > 0){
-        delta = std::sqrt(delta);
-        min_missPz = fabs((b - delta)/a) < fabs((b + delta)/a) ? (b - delta)/a : (b + delta)/a;
-        max_missPz = fabs((b - delta)/a) > fabs((b + delta)/a) ? (b - delta)/a : (b + delta)/a;
-    }
+    delta = delta > 0 ? std::sqrt(delta) : 0;
+    min_missPz = fabs((b - delta)/a) < fabs((b + delta)/a) ? (b - delta)/a : (b + delta)/a;
+    max_missPz = fabs((b - delta)/a) > fabs((b + delta)/a) ? (b - delta)/a : (b + delta)/a;
     
     if(verbose){
        std::cout << " --- solve long missing energy ----" << std::endl;
