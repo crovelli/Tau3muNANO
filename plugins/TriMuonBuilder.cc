@@ -16,6 +16,13 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+#include "DataFormats/PatCandidates/interface/TriggerPath.h"
+#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
+#include "DataFormats/PatCandidates/interface/TriggerAlgorithm.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
@@ -37,6 +44,9 @@
 #include "helper.h"
 #include "diMuonResonances.h"
 #include "KinVtxFitter.h"
+#include "TVector3.h"
+
+using namespace std;
 
 class TriMuonBuilder : public edm::global::EDProducer<> {
 
@@ -58,6 +68,10 @@ public:
     //met_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("met") )},
     //PuppiMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("PuppiMet") )},
     beamSpotSrc_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )},
+    triggerBits_{consumes<edm::TriggerResults>( cfg.getParameter<edm::InputTag>("bits") )},
+    triggerObjects_{consumes<std::vector<pat::TriggerObjectStandAlone>>( cfg.getParameter<edm::InputTag>("objects") )},
+    HLTPaths_{cfg.getParameter<std::vector<std::string>>("HLTPaths")},
+    drForTriggerMatch_{cfg.getParameter<double>("drForTriggerMatch")},
     isoRadius_{cfg.getParameter<double>("isoRadius")},
     dBetaCone_{cfg.getParameter<double>("dBetaCone")},
     dBetaValue_{cfg.getParameter<double>("dBetaValue")}
@@ -86,6 +100,10 @@ private:
   //const edm::EDGetTokenT<pat::METCollection> met_;
   //const edm::EDGetTokenT<pat::METCollection> PuppiMet_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
+  const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
+  const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
+  std::vector<std::string> HLTPaths_;
+  const double drForTriggerMatch_;
   const double isoRadius_;
   const double dBetaCone_;
   const double dBetaValue_;
@@ -119,6 +137,13 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   edm::Handle<reco::BeamSpot> beamSpotHandle;
   evt.getByToken(beamSpotSrc_, beamSpotHandle);
   const reco::BeamSpot& beamSpot = *beamSpotHandle;
+
+  edm::Handle<edm::TriggerResults> triggerBits;
+  evt.getByToken(triggerBits_, triggerBits);
+  const edm::TriggerNames &trigNames = evt.triggerNames(*triggerBits); 
+
+  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
+  evt.getByToken(triggerObjects_, triggerObjects);
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
@@ -248,8 +273,134 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
       float dz_mu13 = ( (l1_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
       float dz_mu23 = ( (l2_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l2_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
 
+
+      // HLT / offline match for the last HLT filter (building the tau candidate)
+      
+      // These vectors have one entry per HLT path
+      std::vector<int> frs(HLTPaths_.size(),0);              
+      std::vector<float> temp_DR(HLTPaths_.size(),1000.);
+
+      TVector3 tauTV3;
+      tauTV3.SetPtEtaPhi( (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Pt(),  
+			  (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Eta(),  
+			  (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Phi() );
+
+      // Loop over trigger paths
+      int ipath=-1;
+      for (const std::string path: HLTPaths_){
+	
+	if(debug) std::cout << "ipath = " << ipath << ", path = " << path << std::endl;
+	if(debug) std::cout << std::endl;
+	ipath++;
+      
+	// Here we loop over trigger objects
+	float minDr = 1000.;
+	if(debug) std::cout << std::endl;
+	if(debug) std::cout << "Now start loop over trigger objects" << std::endl;
+	for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
+	  
+	  if(debug) std::cout << "New object" << std::endl;
+
+	  // consider only objects which match the ref path    
+	  obj.unpackPathNames(trigNames);
+	  obj.unpackFilterLabels(evt, *triggerBits);
+	  std::vector<std::string> pathNamesAll  = obj.pathNames(false);
+	  bool isPathExist = false;
+	  
+	  for (unsigned h = 0, n = pathNamesAll.size(); h < n; ++h) {
+	    string pathNameStart;
+	    pathNameStart = pathNamesAll[h].substr(0,pathNamesAll[h].find("_v")-0);
+	    if(debug) std::cout << "In loop over trigger object: this is ipath = " << pathNamesAll[h] << ", I need path = " << path << std::endl;	  
+	    if(pathNameStart==path) isPathExist = true;
+	  }
+	  if(!isPathExist) continue;
+	  
+	  if(debug) std::cout << "One of the two paths is found" << std::endl;	  
+	  
+	  int tauObjNumber = -1;
+	  for (unsigned hh = 0; hh < obj.filterLabels().size(); ++hh){	
+
+	    if(debug) std::cout << "Event: Filter " << hh << " => " << obj.filterLabels()[hh] << ": pt =  " << obj.pt() << ", eta = " << obj.eta() << ", phi = " << obj.phi() << std::endl;
+	    if(debug) std::cout << "" << std::endl;	  
+
+	    if (path=="HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1") {	  
+	      if(obj.filterLabels()[hh].find("hltTau3MuIsoFilterCharge1") != std::string::npos) {  
+		tauObjNumber = hh;
+	      }
+	    }
+	    if (path=="HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15") {	  
+	      if(obj.filterLabels()[hh].find("hltTau3MuIsoFilter") != std::string::npos) {  
+		tauObjNumber = hh;
+	      }
+	    }
+	  }
+	  if(debug && tauObjNumber>=0) std::cout << "Loop over filters done, my Tau filter found" << std::endl;
+	  if(debug && tauObjNumber<0)  std::cout << "Loop over filters done, my filters NOT found" << std::endl;
+	  
+	  // here HLT obj vs reco triplet candidate
+	  TVector3 objTV3;
+	  objTV3.SetPtEtaPhi( obj.pt(), obj.eta(), obj.phi() );
+	  Float_t deltaR = fabs(tauTV3.DeltaR(objTV3));
+	  
+	  // here HLT-tau candidates
+	  if (tauObjNumber>=0) {  
+	    if(debug) std::cout<< "DeltaR = " << deltaR << std::endl;
+	    if(debug) std::cout << "This is a tau HLT candidate" << endl;
+	    if(deltaR < drForTriggerMatch_){    
+	      frs[ipath]=1;  
+	      if (deltaR < minDr){
+		minDr = deltaR;
+	      }
+	      if(debug) std::cout << "This object is matched with tau: minDr = " << minDr << std::endl;
+	      if(debug) std::cout << "Offline: " << tauTV3.Pt() << " " << tauTV3.Eta() << " " << tauTV3.Phi() << std::endl;
+	      if(debug) std::cout << "HLT: "     << obj.pt()    << " " << obj.eta()    << " " << obj.phi()    << std::endl;
+	      if(debug) std::cout << tauObjNumber << std::endl;
+	    }
+	  }
+	  
+	} // Loop over trigger object
+
+	// Minimum dR between reco triplet and all its matched HLT objects for this HLT path
+	temp_DR[ipath]=minDr;
+	
+      } // Loop over HLT paths
+      
+      if(debug) {
+	std::cout << std::endl;
+	std::cout << "Summary for this reco tau: " << std::endl;
+	int size1 = frs.size();
+	int size2 = temp_DR.size();
+	if (size1!=size2) 
+	  std::cout << "problem with size: " << size1 << " " << size2 << std::endl;
+	else {
+	  std::cout << "size ok: " << size1 << std::endl;	
+	  for (int jj=0; jj<size1; jj++) std::cout << "fired = " << frs[jj] << ", dR = " << temp_DR[jj] << std::endl;
+	}					 
+      } 
+      
+      int mytriggersize = frs.size();
+      for (int jj=0; jj<mytriggersize; jj++) {
+	std::string namedr = HLTPaths_[jj]+"_dr";
+	muon_triplet.addUserInt(HLTPaths_[jj],frs[jj]);  
+	muon_triplet.addUserFloat(namedr,temp_DR[jj]); 
+      }					 
+      
+      // HLT / offline match for last HLT filter - end
+      // -----------------------------------------------------
+      
+        // 1st KIN FIT WITHOUT VTX COSTRAINT
+        //   Tau infos after 1st fit
+        TVector3 Tau_wovc(fitted_cand.globalMomentum().x(),
+                          fitted_cand.globalMomentum().y(),
+                          fitted_cand.globalMomentum().z());
+        muon_triplet.addUserFloat("fitted_wovc_pt",  Tau_wovc.Pt());
+        muon_triplet.addUserFloat("fitted_wovc_eta", Tau_wovc.Eta());
+        muon_triplet.addUserFloat("fitted_wovc_phi", Tau_wovc.Phi());
+        
+        // Tau vertex after fit
         // KINEMATIC FIT RESULTS
         // 3Mu vertex after fit
+
         muon_triplet.addUserFloat("fitted_vtxX",  fitted_vtx->position().x());
         muon_triplet.addUserFloat("fitted_vtxY",  fitted_vtx->position().y());
         muon_triplet.addUserFloat("fitted_vtxZ",  fitted_vtx->position().z());

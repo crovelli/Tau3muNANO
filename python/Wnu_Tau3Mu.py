@@ -4,6 +4,9 @@ from PhysicsTools.NanoAOD.met_cff import *
 
 ########## inputs preparation ################
 
+Path2022=["HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1","HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15","HLT_DoubleMu4_3_LowMass"]
+Path=Path2022
+
 # Tau -> 3mu
 muonTripletForTau3Mu = cms.EDProducer('TriMuonBuilder',
     src = cms.InputTag('triMuonTrgSelector', 'SelectedMuons'),
@@ -12,12 +15,17 @@ muonTripletForTau3Mu = cms.EDProducer('TriMuonBuilder',
     #met = cms.InputTag('slimmedMETs'),
     #PuppiMet = cms.InputTag('slimmedMETsPuppi'),
     beamSpot   = cms.InputTag("offlineBeamSpot"),
+    bits = cms.InputTag("TriggerResults","","HLT"), 
+    objects = cms.InputTag("slimmedPatTrigger"),                                         
     # selection definition
     lep1Selection = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
     lep2Selection = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
     lep3Selection = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
     preVtxSelection = cms.string('mass() < 3 && abs(charge()) == 1'), # selection for tau candidates pre-fit
     postVtxSelection =  cms.string('userInt("vtx_isValid")'),
+    # trigger
+    HLTPaths=cms.vstring(Path),                                                                        
+    drForTriggerMatch = cms.double(0.1), 
     # isolation parameters
     isoRadius = cms.double(0.4), # dR of the isolation cone
     dBetaCone = cms.double(0.8),
@@ -83,6 +91,9 @@ Tau3MuTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
         dZmu23 = ufloat('dZmu23'),
         sigLxy_3muVtxBS = ufloat('sigLxy_3muVtxBS'),
         CosAlpha2D_LxyP3mu = ufloat('Cos2D_LxyP3mu'),
+
+        fired_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1 = uint("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1"),
+        Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1_dr = ufloat("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1_dr"),
 
         mu1_pt = ufloat("mu1_pt"),
         mu1_eta = ufloat("mu1_eta"),

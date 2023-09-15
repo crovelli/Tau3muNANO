@@ -188,9 +188,7 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
       
 	if(debug) std::cout << "Path found" << std::endl;	  
 
-	// muObjNumberGM: hlt candidate firing the dimuon part of the trigger, requiring global muons
 	// muObjNumberTM: hlt candidate firing the request for tracker muons
-	int muObjNumberGM = -1;
 	int muObjNumberTM = -1;
 	int muObjNumberUniv = -1;
 	for (unsigned hh = 0; hh < obj.filterLabels().size(); ++hh){	
@@ -202,9 +200,6 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
 	    if(obj.filterLabels()[hh].find("hltTau3MuTriMuon1filter") != std::string::npos) {  
 	      muObjNumberTM = hh;
 	    }
-	    if(obj.filterLabels()[hh].find("hltDiMuonForTau3MuDzFiltered0p3") != std::string::npos) {  
-	      muObjNumberGM = hh;
-	    }
 	  }
 	  if (path=="HLT_DoubleMu4_3_LowMass") {
 	    if(obj.filterLabels()[hh].find("hltDoubleMu43LowMassL3Filtered") != std::string::npos) {  
@@ -213,9 +208,8 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
 	  }
 	}
 	if(debug && muObjNumberTM>=0) std::cout << "Loop over filters done, my TM filter found" << std::endl;
-	if(debug && muObjNumberGM>=0) std::cout << "Loop over filters done, my GM filter found" << std::endl;
 	if(debug && muObjNumberUniv>=0) std::cout << "Loop over filters done, my Univ filter found" << std::endl;
-	if(debug && muObjNumberGM<0 && muObjNumberTM<0 && muObjNumberUniv<0) std::cout << "Loop over filters done, my filters NOT found" << std::endl;
+	if(debug && muObjNumberTM<0 && muObjNumberUniv<0) std::cout << "Loop over filters done, my filters NOT found" << std::endl;
       
 	// here HLT obj vs reco muon candidates
 	TVector3 muTV3, objTV3;
@@ -224,7 +218,7 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
 	Float_t deltaR = fabs(muTV3.DeltaR(objTV3));
     
 	// here HLT-muon candidates
-	if (muObjNumberTM>=0 || muObjNumberGM>=0 || muObjNumberUniv>=0) {  
+	if (muObjNumberTM>=0 || muObjNumberUniv>=0) {  
 	  if(debug) std::cout<< "DeltaR = " << deltaR << std::endl;
 	  if(debug) std::cout << "This is a muon HLT candidate" << endl;
 	  if(deltaR < drForTriggerMatch_){    
@@ -236,7 +230,7 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
 	    if(debug) std::cout << "This object is matched with muon: minDr = " << minDr << std::endl;
 	    if(debug) std::cout << "Offline: " << muon.pt() << " " << muon.eta() << " " << muon.phi() << std::endl;
 	    if(debug) std::cout << "HLT: " << obj.pt() << " " << obj.eta() << " " << obj.phi() << std::endl;
-	    if(debug) std::cout << muObjNumberTM << " " << muObjNumberGM << " " << muObjNumberUniv << std::endl;
+	    if(debug) std::cout << muObjNumberTM << " " << muObjNumberUniv << std::endl;
 	  }
 	}
 	
