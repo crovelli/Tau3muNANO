@@ -65,8 +65,8 @@ public:
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )},
     pkdCand_src_{consumes<PackedCandidatesCollection>( cfg.getParameter<edm::InputTag>("packedCandidatesSrc") )},
-    met_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("met") )},
-    PuppiMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("PuppiMet") )},
+    //met_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("met") )},
+    //PuppiMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("PuppiMet") )},
     beamSpotSrc_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )},
     triggerBits_{consumes<edm::TriggerResults>( cfg.getParameter<edm::InputTag>("bits") )},
     triggerObjects_{consumes<std::vector<pat::TriggerObjectStandAlone>>( cfg.getParameter<edm::InputTag>("objects") )},
@@ -97,8 +97,8 @@ private:
   const edm::EDGetTokenT<MuonCollection> src_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
   const edm::EDGetTokenT<PackedCandidatesCollection> pkdCand_src_;
-  const edm::EDGetTokenT<pat::METCollection> met_;
-  const edm::EDGetTokenT<pat::METCollection> PuppiMet_;
+  //const edm::EDGetTokenT<pat::METCollection> met_;
+  //const edm::EDGetTokenT<pat::METCollection> PuppiMet_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
@@ -113,7 +113,7 @@ private:
 
 void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
-  float the_MUON_SIGMA = 0.0000001;
+  //float the_MUON_SIGMA = 0.0000001;
   
   // input
   edm::Handle<MuonCollection> muons;
@@ -126,13 +126,13 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   evt.getByToken(pkdCand_src_, pkdPFcand_hdl);
   //const PackedCandidatesCollection& pkdPFcand = *pkdPFcand_hdl;
 
-  edm::Handle<pat::METCollection> Met;
-  evt.getByToken(met_, Met);
-  const pat::MET &met = Met->front();// get PF Type-1 corrected MET directly available from miniAOD
+  //edm::Handle<pat::METCollection> Met;
+  //evt.getByToken(met_, Met);
+  //const pat::MET &met = Met->front();// get PF Type-1 corrected MET directly available from miniAOD
 
-  edm::Handle<pat::METCollection> P_Met;
-  evt.getByToken(PuppiMet_, P_Met);
-  const pat::MET &PuppiMet = P_Met->front();
+  //edm::Handle<pat::METCollection> P_Met;
+  //evt.getByToken(PuppiMet_, P_Met);
+  //const pat::MET &PuppiMet = P_Met->front();
 
   edm::Handle<reco::BeamSpot> beamSpotHandle;
   evt.getByToken(beamSpotSrc_, beamSpotHandle);
@@ -179,7 +179,7 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserCand("l2", l2_ptr );    
         muon_triplet.addUserCand("l3", l3_ptr );
 
-        // 1st KinVtx fit
+        // Kinematic vertex fit
         if( !pre_vtx_selection_(muon_triplet) ) continue;
         if(debug) std::cout << "  muon_triplet charge " << muon_triplet.charge() << std::endl;
         KinVtxFitter fitter(
@@ -188,40 +188,41 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
                 {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the particle mass
                 );
         if ( !fitter.success() ) continue;
-        // save intermediate quantities after 1st fit needed for selection and to be saved in the final ntuples
         muon_triplet.addUserFloat("vtx_prob", fitter.prob());
         muon_triplet.addUserFloat("vtx_chi2", fitter.chi2());
         muon_triplet.addUserFloat("vtx_Ndof", fitter.dof());
         KinematicState fitted_cand = fitter.fitted_candidate();
-        muon_triplet.addUserFloat("fitted_wovc_mass", fitter.success() ? fitted_cand.mass() : -1);
+        muon_triplet.addUserFloat("fitted_mass", fitter.success() ? fitted_cand.mass() : -1);
         RefCountedKinematicVertex fitted_vtx = fitter.fitted_refvtx();
         muon_triplet.addUserInt("vtx_isValid", fitted_vtx->vertexIsValid());
         if( !post_vtx_selection_(muon_triplet) ) continue;
+        // save fitted candidate kinematics
+        TLorentzVector fittedTau_P4;
+        fittedTau_P4.SetPtEtaPhiM(fitted_cand.globalMomentum().perp(), 
+			                      fitted_cand.globalMomentum().eta(),
+			                      fitted_cand.globalMomentum().phi(),
+			                      fitted_cand.mass());
                 
         // 2nd KinVtx fit with vertex costraint
-        KinematicParticleFactoryFromTransientTrack factory;
-        std::vector<RefCountedKinematicParticle> particles;
-        particles.emplace_back(factory.particle( ttracks->at(l1_idx), l1_ptr->mass(), 0., 0., the_MUON_SIGMA));
-        particles.emplace_back(factory.particle( ttracks->at(l2_idx), l2_ptr->mass(), 0., 0., the_MUON_SIGMA));
-        particles.emplace_back(factory.particle( ttracks->at(l3_idx), l3_ptr->mass(), 0., 0., the_MUON_SIGMA));
-        std::vector<KinematicState> kinstate_muons;
-        kinstate_muons.push_back(particles.at(0)->currentState());
-        kinstate_muons.push_back(particles.at(1)->currentState());
-        kinstate_muons.push_back(particles.at(2)->currentState());
+        //KinematicParticleFactoryFromTransientTrack factory;
+        //std::vector<RefCountedKinematicParticle> particles;
+        //particles.emplace_back(factory.particle( ttracks->at(l1_idx), l1_ptr->mass(), 0., 0., the_MUON_SIGMA));
+        //particles.emplace_back(factory.particle( ttracks->at(l2_idx), l2_ptr->mass(), 0., 0., the_MUON_SIGMA));
+        //particles.emplace_back(factory.particle( ttracks->at(l3_idx), l3_ptr->mass(), 0., 0., the_MUON_SIGMA));
+        //std::vector<KinematicState> kinstate_muons;
+        //kinstate_muons.push_back(particles.at(0)->currentState());
+        ///kinstate_muons.push_back(particles.at(1)->currentState());
+        //kinstate_muons.push_back(particles.at(2)->currentState());
 
-        MultiTrackKinematicConstraint * vtxCostraint = new VertexKinematicConstraint(); 
+        //MultiTrackKinematicConstraint * vtxCostraint = new VertexKinematicConstraint(); 
         // from : https://github.com/cms-sw/cmssw/blob/master/RecoVertex/KinematicFit/src/VertexKinematicConstraint.cc
-        vtxCostraint->value(kinstate_muons, fitted_vtx->position());
-        KinematicConstrainedVertexFitter vc_fitter;
-        RefCountedKinematicTree vc_FitTree = vc_fitter.fit(particles, vtxCostraint);
-        if (vc_FitTree->isEmpty() || !vc_FitTree->isValid() || !vc_FitTree->isConsistent()) continue;
-        vc_FitTree->movePointerToTheTop(); 
-        KinematicState refitted_cand = vc_FitTree->currentParticle()->currentState();
-        TLorentzVector Tau_vc;
-        Tau_vc.SetPtEtaPhiM(refitted_cand.globalMomentum().perp(), 
-			                      refitted_cand.globalMomentum().eta(),
-			                      refitted_cand.globalMomentum().phi(),
-			                      refitted_cand.mass());
+        //vtxCostraint->value(kinstate_muons, fitted_vtx->position());
+        //KinematicConstrainedVertexFitter vc_fitter;
+        //RefCountedKinematicTree vc_FitTree = vc_fitter.fit(particles, vtxCostraint);
+        //if (vc_FitTree->isEmpty() || !vc_FitTree->isValid() || !vc_FitTree->isConsistent()) continue;
+        //vc_FitTree->movePointerToTheTop(); 
+        //KinematicState refitted_cand = vc_FitTree->currentParticle()->currentState();
+        
         // Lxy BS - 3mu-vtx
         // from : https://cmssdt.cern.ch/lxr/source/HLTrigger/btau/plugins/HLTDisplacedmumuFilter.cc
         GlobalPoint fittedVtxPoint(fitted_vtx->position().x(), fitted_vtx->position().y(), fitted_vtx->position().z());
@@ -237,15 +238,15 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         float sigLxy_3muVtxBS = Lxy_3muVtxBS/errLxy_3muVtxBS;
 
         // CosAlpha2D( Lxy(BS-3muV) ; P_3mu)
-        math::XYZVector TauCand_refittedP3(Tau_vc.Px(), Tau_vc.Py(), 0 );
+        math::XYZVector TauCand_refittedP3(fittedTau_P4.Px(), fittedTau_P4.Py(), 0 );
         reco::Vertex::Point dist2D_3muVtxBS(displacementfitVtxBS.x(), displacementfitVtxBS.y(), 0.);
         float CosAlpha2D_LxyP3mu = dist2D_3muVtxBS.Dot(TauCand_refittedP3)/(dist2D_3muVtxBS.R()*TauCand_refittedP3.R());
       
 
 
        // TRANSVERSE MASS
-       float Tau_mT = std::sqrt(2. * Tau_vc.Perp()* met.pt() * (1 - std::cos(Tau_vc.Phi()-met.phi())));
-       float Tau_Puppi_mT = std::sqrt(2. * Tau_vc.Perp()* PuppiMet.pt() * (1 - std::cos(Tau_vc.Phi()-PuppiMet.phi())));
+       //float Tau_mT = std::sqrt(2. * fittedTau_P4.Perp()* met.pt() * (1 - std::cos(fittedTau_P4.Phi()-met.phi())));
+       //float Tau_Puppi_mT = std::sqrt(2. * fittedTau_P4.Perp()* PuppiMet.pt() * (1 - std::cos(fittedTau_P4.Phi()-PuppiMet.phi())));
 
        // VETO di-muon resonances 
        bool isToVeto = vetoResonances(evt, {l1_idx,l2_idx,l3_idx}, &muon_triplet);
@@ -395,26 +396,30 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("fitted_wovc_pt",  Tau_wovc.Pt());
         muon_triplet.addUserFloat("fitted_wovc_eta", Tau_wovc.Eta());
         muon_triplet.addUserFloat("fitted_wovc_phi", Tau_wovc.Phi());
+        
         // Tau vertex after fit
+        // KINEMATIC FIT RESULTS
+        // 3Mu vertex after fit
+
         muon_triplet.addUserFloat("fitted_vtxX",  fitted_vtx->position().x());
         muon_triplet.addUserFloat("fitted_vtxY",  fitted_vtx->position().y());
         muon_triplet.addUserFloat("fitted_vtxZ",  fitted_vtx->position().z());
         muon_triplet.addUserFloat("fitted_vtxEx", fitted_vtx->error().cxx());
         muon_triplet.addUserFloat("fitted_vtxEy", fitted_vtx->error().cyy());
         muon_triplet.addUserFloat("fitted_vtxEz", fitted_vtx->error().czz());
-        // 2nd KIN FIT WITH VTX COSTRAINT
-        muon_triplet.addUserFloat("fitted_vc_pt"  , Tau_vc.Perp()); 
-        muon_triplet.addUserFloat("fitted_vc_eta" , Tau_vc.Eta());
-        muon_triplet.addUserFloat("fitted_vc_phi" , Tau_vc.Phi());
-        muon_triplet.addUserFloat("fitted_vc_mass", refitted_cand.mass()); 
+        // Tau candidate kinematics after fit
+        muon_triplet.addUserFloat("fitted_pt"  , fittedTau_P4.Perp()); 
+        muon_triplet.addUserFloat("fitted_eta" , fittedTau_P4.Eta());
+        muon_triplet.addUserFloat("fitted_phi" , fittedTau_P4.Phi());
+        muon_triplet.addUserFloat("fitted_mass", fitted_cand.mass()); 
 
         // MET infos
-        muon_triplet.addUserFloat("MET_pt", met.pt()); 
-        muon_triplet.addUserFloat("mT", Tau_mT); 
-        muon_triplet.addUserInt("MET_isPf", met.isPFMET()); 
-        muon_triplet.addUserFloat("PuppiMET_pt", PuppiMet.pt()); 
-        muon_triplet.addUserFloat("Puppi_mT", Tau_Puppi_mT); 
-        muon_triplet.addUserInt("PuppiMET_isPf", PuppiMet.isPFMET()); 
+        //muon_triplet.addUserFloat("MET_pt", met.pt()); 
+        //muon_triplet.addUserFloat("mT", Tau_mT); 
+        //muon_triplet.addUserInt("MET_isPf", met.isPFMET()); 
+        //muon_triplet.addUserFloat("PuppiMET_pt", PuppiMet.pt()); 
+        //muon_triplet.addUserFloat("Puppi_mT", Tau_Puppi_mT); 
+        //muon_triplet.addUserInt("PuppiMET_isPf", PuppiMet.isPFMET()); 
 
         // ISOLATION info
         muon_triplet.addUserFloat("iso_ptChargedFromPV", ptChargedFromPV);

@@ -1,5 +1,9 @@
 # Text files
 *.txt
+*.log
+
+# CRAB report
+production/Tau3MuNano2022_*/*
 
 # Multimedia
 *.pdf
