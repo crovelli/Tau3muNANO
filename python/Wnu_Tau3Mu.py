@@ -94,6 +94,8 @@ Tau3MuTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
 
         fired_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1 = uint("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1"),
         Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1_dr = ufloat("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1_dr"),
+        fired_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15 = uint("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15"),
+        Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_dr = ufloat("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_dr"),
 
         mu1_pt = ufloat("mu1_pt"),
         mu1_eta = ufloat("mu1_eta"),
