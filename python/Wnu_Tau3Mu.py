@@ -28,6 +28,8 @@ muonTripletForTau3Mu = cms.EDProducer('TriMuonBuilder',
     drForTriggerMatch = cms.double(0.1), 
     # isolation parameters
     isoRadius = cms.double(0.4), # dR of the isolation cone
+    isoRadiusForHLT = cms.double(0.8), # dR of the isolation cone applied at HLT level
+    MaxDZForHLT = cms.double(0.3), # dZ tau-track for isolation
     dBetaCone = cms.double(0.8),
     dBetaValue = cms.double(0.2), # optimised for Run2... check validity for Run3
 )
@@ -84,6 +86,7 @@ Tau3MuTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
         iso_ptChargedFromPV = ufloat("iso_ptChargedFromPV"),
         iso_ptChargedFromPU = ufloat("iso_ptChargedFromPU"),
         iso_ptPhotons       = ufloat("iso_ptPhotons"),
+        iso_ptChargedForHLT = ufloat("iso_ptChargedForHLT"),
         absIsolation        = ufloat("absIsolation"),
 
         dZmu12 = ufloat('dZmu12'),

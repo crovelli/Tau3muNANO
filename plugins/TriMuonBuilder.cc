@@ -73,6 +73,8 @@ public:
     HLTPaths_{cfg.getParameter<std::vector<std::string>>("HLTPaths")},
     drForTriggerMatch_{cfg.getParameter<double>("drForTriggerMatch")},
     isoRadius_{cfg.getParameter<double>("isoRadius")},
+    isoRadiusForHLT_{cfg.getParameter<double>("isoRadiusForHLT")},
+    MaxDZForHLT_{cfg.getParameter<double>("MaxDZForHLT")},
     dBetaCone_{cfg.getParameter<double>("dBetaCone")},
     dBetaValue_{cfg.getParameter<double>("dBetaValue")}
     {
@@ -105,6 +107,8 @@ private:
   std::vector<std::string> HLTPaths_;
   const double drForTriggerMatch_;
   const double isoRadius_;
+  const double isoRadiusForHLT_;
+  const double MaxDZForHLT_;
   const double dBetaCone_;
   const double dBetaValue_;
 
@@ -254,11 +258,12 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
       // Tau candidate ISOLATION
       // custom class ... to check carefully
-      IsolationComputer isoComputer = IsolationComputer(pkdPFcand_hdl, isoRadius_, 0.2, dBetaCone_);
+       IsolationComputer isoComputer = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, 0.2, dBetaCone_);
       isoComputer.addMuonsToVeto({l1_ptr, l2_ptr, l3_ptr});
       float ptChargedFromPV = isoComputer.pTcharged_iso(muon_triplet);
       float ptChargedFromPU = isoComputer.pTcharged_PU(muon_triplet);
       float ptPhotons = isoComputer.pTphoton(muon_triplet);
+      float ptChargedForHLT = isoComputer.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
       // class initiated with outer beta cone radius (NOT WORKING!!)
       //heppy::IsolationComputer isoComputer = heppy::IsolationComputer(dBetaCone_);
       //isoComputer.setPackedCandidates(pkdPFcand, -1, 0.2, 9999, true); // std::vector<pat::PackedCandidate>, fromPV_thresh, dz_thresh, dxy_thresh, also_leptons
@@ -425,6 +430,7 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("iso_ptChargedFromPV", ptChargedFromPV);
         muon_triplet.addUserFloat("iso_ptChargedFromPU", ptChargedFromPU);
         muon_triplet.addUserFloat("iso_ptPhotons", ptPhotons);
+        muon_triplet.addUserFloat("iso_ptChargedForHLT", ptChargedForHLT);
         muon_triplet.addUserFloat("absIsolation",TauAbsIsolation);
 
         // useful quantities for BDT
