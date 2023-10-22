@@ -3,6 +3,8 @@
 IsolationComputer::IsolationComputer(
     edm::Handle<PackedCandidatesCollection>& inputPFcandiadtes,
     const double isoRadius,
+    const double isoRadiusForHLT,
+    const double MaxDZForHLT,
     const double dZpv,
     const double dBetaCone,
     const double dBetaValue, // optimised for Run2
@@ -10,6 +12,8 @@ IsolationComputer::IsolationComputer(
 ){
     PFcandCollection_ = inputPFcandiadtes;
     isoRadius_ = isoRadius;
+    isoRadiusForHLT_ = isoRadiusForHLT;
+    MaxDZForHLT_ = MaxDZForHLT;
     dZpv_ = dZpv;
     dBetaCone_ = dBetaCone;
     dBetaValue_ = dBetaValue;
@@ -26,6 +30,15 @@ IsolationComputer::IsolationComputer(
             pileup_.push_back(&p);
         }
     }// loop on PF candidates from miniAOD
+
+    // all charged candidates for HLT emulation
+    for(const pat::PackedCandidate &p : *PFcandCollection_){
+        if(p.charge() != 0){
+	  if (!p.trackHighPurity()) continue;
+	  chargedforhlt_.push_back(&p);
+        }
+    }// loop on PF candidates from miniAOD
+
     //std::cout << "Found " << neutral_.size() << " neutral ptls " << std::endl;
     //std::cout << "Found " << charged_.size() << " charged ptls w dz<0.2" << std::endl;
     //std::cout << "Found " << pileup_.size()  << " charged-PU ptls in the iso-Cone" << std::endl;  
@@ -84,4 +97,17 @@ double IsolationComputer::pTphoton(const reco::Candidate& tau_cand) const{
     return sum_pTphoton;
 }// pTcharged_PU()
 
+double IsolationComputer::pTchargedforhlt_iso(const reco::Candidate& tau_cand, float tau_vz) const {
+  double sum_pTcharge = 0;
+  for (IT ichargedforhltIso = chargedforhlt_.begin(); ichargedforhltIso != chargedforhlt_.end(); ++ichargedforhltIso) {
+    if (!(*ichargedforhltIso)) continue;
+    if( reco::deltaR( (*ichargedforhltIso)->p4(), tau_cand.p4() ) > isoRadiusForHLT_ ) continue;
+    if( fabs((*ichargedforhltIso)->vz() - tau_vz) > MaxDZForHLT_ ) continue;
+    sum_pTcharge += (*ichargedforhltIso)->pt();
+  }
+  // remove tau pT
+  sum_pTcharge -=tau_cand.pt();
+  if (sum_pTcharge<0) sum_pTcharge=0;
+  return sum_pTcharge;
+} 
 

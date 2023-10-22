@@ -16,6 +16,8 @@ class IsolationComputer{
     IsolationComputer(
         edm::Handle<PackedCandidatesCollection>& inputPFcandiadtes, 
         const double isoRadius,
+        const double isoRadiusForHLT,
+	const double MaxDZForHLT,
         const double dZpv,
         const double dBetaCone,
         const double dBetaValue = 0.2,
@@ -27,6 +29,7 @@ class IsolationComputer{
     double pTcharged_iso(const reco::Candidate& tau_cand) const;
     double pTcharged_PU(const reco::Candidate& tau_cand) const;
     double pTphoton(const reco::Candidate& tau_cand) const;
+    double pTchargedforhlt_iso(const reco::Candidate& tau_cand, float tau_vz) const;
 
     // veto muons in the candidate
     void addMuonsToVeto(const std::vector<edm::Ptr<pat::Muon>> inMuToVeto);
@@ -35,10 +38,12 @@ class IsolationComputer{
 
     // PF candidates
     edm::Handle<PackedCandidatesCollection> PFcandCollection_ ;
-    std::vector<const pat::PackedCandidate *> charged_, neutral_, pileup_;
+    std::vector<const pat::PackedCandidate *> charged_, neutral_, pileup_, chargedforhlt_;
 
     // isolation parameters
     double isoRadius_;
+    double isoRadiusForHLT_;
+    double MaxDZForHLT_;
     double dZpv_;
     double dBetaCone_;
     double dBetaValue_;
