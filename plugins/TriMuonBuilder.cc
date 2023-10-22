@@ -192,41 +192,27 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
                 {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the particle mass
                 );
         if ( !fitter.success() ) continue;
+        // * mass
+        KinematicState fitted_cand = fitter.fitted_candidate();
+        muon_triplet.addUserFloat("fitted_mass", fitter.success() ? fitted_cand.mass() : -1);
+        KinematicParametersError kinPar_err = fitted_cand.kinematicParametersError();
+        float mass_err = (kinPar_err.isValid()) ? kinPar_err.matrix()(6,6) : -999.;
+        muon_triplet.addUserFloat("fitted_mass_err2", mass_err);
+        // * vertex
         muon_triplet.addUserFloat("vtx_prob", fitter.prob());
         muon_triplet.addUserFloat("vtx_chi2", fitter.chi2());
         muon_triplet.addUserFloat("vtx_Ndof", fitter.dof());
-        KinematicState fitted_cand = fitter.fitted_candidate();
-        muon_triplet.addUserFloat("fitted_mass", fitter.success() ? fitted_cand.mass() : -1);
         RefCountedKinematicVertex fitted_vtx = fitter.fitted_refvtx();
         muon_triplet.addUserInt("vtx_isValid", fitted_vtx->vertexIsValid());
+
         if( !post_vtx_selection_(muon_triplet) ) continue;
-        // save fitted candidate kinematics
+        // * fitted candidate
         TLorentzVector fittedTau_P4;
         fittedTau_P4.SetPtEtaPhiM(fitted_cand.globalMomentum().perp(), 
 			                      fitted_cand.globalMomentum().eta(),
 			                      fitted_cand.globalMomentum().phi(),
 			                      fitted_cand.mass());
                 
-        // 2nd KinVtx fit with vertex costraint
-        //KinematicParticleFactoryFromTransientTrack factory;
-        //std::vector<RefCountedKinematicParticle> particles;
-        //particles.emplace_back(factory.particle( ttracks->at(l1_idx), l1_ptr->mass(), 0., 0., the_MUON_SIGMA));
-        //particles.emplace_back(factory.particle( ttracks->at(l2_idx), l2_ptr->mass(), 0., 0., the_MUON_SIGMA));
-        //particles.emplace_back(factory.particle( ttracks->at(l3_idx), l3_ptr->mass(), 0., 0., the_MUON_SIGMA));
-        //std::vector<KinematicState> kinstate_muons;
-        //kinstate_muons.push_back(particles.at(0)->currentState());
-        ///kinstate_muons.push_back(particles.at(1)->currentState());
-        //kinstate_muons.push_back(particles.at(2)->currentState());
-
-        //MultiTrackKinematicConstraint * vtxCostraint = new VertexKinematicConstraint(); 
-        // from : https://github.com/cms-sw/cmssw/blob/master/RecoVertex/KinematicFit/src/VertexKinematicConstraint.cc
-        //vtxCostraint->value(kinstate_muons, fitted_vtx->position());
-        //KinematicConstrainedVertexFitter vc_fitter;
-        //RefCountedKinematicTree vc_FitTree = vc_fitter.fit(particles, vtxCostraint);
-        //if (vc_FitTree->isEmpty() || !vc_FitTree->isValid() || !vc_FitTree->isConsistent()) continue;
-        //vc_FitTree->movePointerToTheTop(); 
-        //KinematicState refitted_cand = vc_FitTree->currentParticle()->currentState();
-        
         // Lxy BS - 3mu-vtx
         // from : https://cmssdt.cern.ch/lxr/source/HLTrigger/btau/plugins/HLTDisplacedmumuFilter.cc
         GlobalPoint fittedVtxPoint(fitted_vtx->position().x(), fitted_vtx->position().y(), fitted_vtx->position().z());
@@ -246,11 +232,32 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         reco::Vertex::Point dist2D_3muVtxBS(displacementfitVtxBS.x(), displacementfitVtxBS.y(), 0.);
         float CosAlpha2D_LxyP3mu = dist2D_3muVtxBS.Dot(TauCand_refittedP3)/(dist2D_3muVtxBS.R()*TauCand_refittedP3.R());
       
-
-
-       // TRANSVERSE MASS
-       //float Tau_mT = std::sqrt(2. * fittedTau_P4.Perp()* met.pt() * (1 - std::cos(fittedTau_P4.Phi()-met.phi())));
-       //float Tau_Puppi_mT = std::sqrt(2. * fittedTau_P4.Perp()* PuppiMet.pt() * (1 - std::cos(fittedTau_P4.Phi()-PuppiMet.phi())));
+        //DCA between two muons (used at HLT)
+        float DCA12, DCA23, DCA13;
+        TrajectoryStateClosestToPoint mu1TS = (ttracks->at(l1_idx)).impactPointTSCP();
+        TrajectoryStateClosestToPoint mu2TS = (ttracks->at(l2_idx)).impactPointTSCP();
+        TrajectoryStateClosestToPoint mu3TS = (ttracks->at(l3_idx)).impactPointTSCP();
+        ClosestApproachInRPhi cApp_12, cApp_23, cApp_13;
+        if (mu1TS.isValid() && mu2TS.isValid()) cApp_12.calculate(mu1TS.theState(), mu2TS.theState());
+        DCA12 = (cApp_12.status())? cApp_12.distance() : 999.;
+        if (mu2TS.isValid() && mu3TS.isValid()) cApp_23.calculate(mu2TS.theState(), mu3TS.theState());
+        DCA23 = (cApp_23.status())? cApp_23.distance() : 999.;
+        if (mu1TS.isValid() && mu3TS.isValid()) cApp_13.calculate(mu1TS.theState(), mu3TS.theState());
+        DCA13 = (cApp_13.status())? cApp_13.distance() : 999.;
+        muon_triplet.addUserFloat("mu12_DCA",DCA12);
+        muon_triplet.addUserFloat("mu23_DCA",DCA23);
+        muon_triplet.addUserFloat("mu13_DCA",DCA13);
+        
+        // di-muon vtx probability (used at HLT)
+        // * mu_1 - mu_2
+        KinVtxFitter fitter_mu12({ttracks->at(l1_idx), ttracks->at(l2_idx)}, {l1_ptr->mass(), l2_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
+        muon_triplet.addUserFloat("mu12_vtxFitProb", (fitter_mu12.success() ? fitter_mu12.prob() : -1.));
+        // * mu_2 - mu_3
+        KinVtxFitter fitter_mu23({ttracks->at(l2_idx), ttracks->at(l3_idx)}, {l2_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
+        muon_triplet.addUserFloat("mu23_vtxFitProb", (fitter_mu23.success() ? fitter_mu23.prob() : -1.));
+        // * mu_1 - mu_3
+        KinVtxFitter fitter_mu13({ttracks->at(l1_idx), ttracks->at(l3_idx)}, {l1_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
+        muon_triplet.addUserFloat("mu13_vtxFitProb", (fitter_mu13.success() ? fitter_mu13.prob() : -1.));
 
        // VETO di-muon resonances 
        bool isToVeto = vetoResonances(evt, {l1_idx,l2_idx,l3_idx}, &muon_triplet);
@@ -437,6 +444,8 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("dZmu12", dz_mu12); 
         muon_triplet.addUserFloat("dZmu13", dz_mu13);
         muon_triplet.addUserFloat("dZmu23", dz_mu23);
+        muon_triplet.addUserFloat("Lxy_3muVtxBS", Lxy_3muVtxBS);
+        muon_triplet.addUserFloat("errLxy_3muVtxBS", errLxy_3muVtxBS);
         muon_triplet.addUserFloat("sigLxy_3muVtxBS", sigLxy_3muVtxBS);
         muon_triplet.addUserFloat("Cos2D_LxyP3mu",CosAlpha2D_LxyP3mu),
       
@@ -446,19 +455,19 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("mu1_pt",  l1_ptr->pt());
         muon_triplet.addUserFloat("mu1_eta", l1_ptr->eta());
         muon_triplet.addUserFloat("mu1_phi", l1_ptr->phi());
-        muon_triplet.addUserFloat("mu1_dr",  l1_ptr->userFloat("dr"));
+        muon_triplet.addUserFloat("mu1_drForHLT",  l1_ptr->userFloat("drForHLT"));
         muon_triplet.addUserInt("mu1_charge" ,l1_ptr->charge());
         muon_triplet.addUserInt("mu1_trackQuality",  l1_ptr->userInt("trackQuality"));
         muon_triplet.addUserFloat("mu2_pt",  l2_ptr->pt());
         muon_triplet.addUserFloat("mu2_eta", l2_ptr->eta());
         muon_triplet.addUserFloat("mu2_phi", l2_ptr->phi());
-        muon_triplet.addUserFloat("mu2_dr",  l2_ptr->userFloat("dr"));   
+        muon_triplet.addUserFloat("mu2_drForHLT",  l2_ptr->userFloat("drForHLT"));   
         muon_triplet.addUserInt("mu2_charge" ,l2_ptr->charge());
         muon_triplet.addUserInt("mu2_trackQuality",  l2_ptr->userInt("trackQuality"));
         muon_triplet.addUserFloat("mu3_pt",  l3_ptr->pt());
         muon_triplet.addUserFloat("mu3_eta", l3_ptr->eta());
         muon_triplet.addUserFloat("mu3_phi", l3_ptr->phi());
-        muon_triplet.addUserFloat("mu3_dr",  l3_ptr->userFloat("dr"));   
+        muon_triplet.addUserFloat("mu3_drForHLT",  l3_ptr->userFloat("drForHLT"));   
         muon_triplet.addUserInt("mu3_charge" ,l3_ptr->charge());
         muon_triplet.addUserInt("mu3_trackQuality",  l3_ptr->userInt("trackQuality"));
 
@@ -533,7 +542,7 @@ bool TriMuonBuilder::vetoResonances(edm::Event& iEvt, const std::vector<size_t> 
           if(debug) std::cout << " checking for matching resonance..." << std::endl;
           for(std::vector< std::pair<float, float> >::iterator reso = resonancesToVeto.begin(); reso != resonancesToVeto.end(); ++reso){
             if( fabs( (fitMass - reso->first)/reso->second)  < SIGMA_TO_EXCLUDE ){
-               std::cout << " matching found " << fabs( (fitMass - reso->first)/reso->second) << std::endl; 
+               if(debug) std::cout << " matching found " << fabs( (fitMass - reso->first)/reso->second) << std::endl; 
                isMatchingResonance = true;
             }
           }// loop on known di-muon resonances  
