@@ -52,6 +52,7 @@ muonT3mTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         
         charge = Var("userInt('charge')",int,doc="charge"),
         trackQuality = Var("userInt('trackQuality')",int,doc="trackQuality"),
+        z = Var("userFloat('z')",float,doc="track z coordinate"),
         dZpv = Var("userFloat('dZpv')",float,doc="long distance from PV"),
         err_dZpv = Var("userFloat('err_dZpv')",float,doc="long error from PV"),
     ),
