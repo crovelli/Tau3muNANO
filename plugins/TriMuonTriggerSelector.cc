@@ -336,7 +336,7 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
 
     // dr cut (same quantity as in HLTMuonDimuonL3Filter, to emulate HLT)
     float mudr = fabs( (- (muon.vx()-beamSpot.x0()) * muon.py() + (muon.vy()-beamSpot.y0()) * muon.px() ) / muon.pt() );
-    muons_out->back().addUserFloat("dr", mudr);  
+    muons_out->back().addUserFloat("drForHLT", mudr);  
 
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
       muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);  // fired HLT or not
