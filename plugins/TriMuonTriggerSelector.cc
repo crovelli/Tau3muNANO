@@ -331,12 +331,13 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
       muons_out->back().addUserInt("trackQuality", 999);
     else
       muons_out->back().addUserInt("trackQuality", (muon.innerTrack()->quality(reco::TrackBase::highPurity)));
+    muons_out->back().addUserFloat("z", muon.vz());
     muons_out->back().addUserFloat("dZpv", muon.muonBestTrack()->dz(PV.position()));
     muons_out->back().addUserFloat("err_dZpv", muon.muonBestTrack()->dzError());
 
     // dr cut (same quantity as in HLTMuonDimuonL3Filter, to emulate HLT)
     float mudr = fabs( (- (muon.vx()-beamSpot.x0()) * muon.py() + (muon.vy()-beamSpot.y0()) * muon.px() ) / muon.pt() );
-    muons_out->back().addUserFloat("dr", mudr);  
+    muons_out->back().addUserFloat("drForHLT", mudr);  
 
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
       muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);  // fired HLT or not
