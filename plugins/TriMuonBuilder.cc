@@ -251,13 +251,13 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         // di-muon vtx probability (used at HLT)
         // * mu_1 - mu_2
         KinVtxFitter fitter_mu12({ttracks->at(l1_idx), ttracks->at(l2_idx)}, {l1_ptr->mass(), l2_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
-        muon_triplet.addUserFloat("mu12_vtxFitProb", (fitter_mu12.success() ? fitter_mu12.prob() : -1.));
+        muon_triplet.addUserFloat("mu12_vtxFitProb", (fitter_mu12.success() ? TMath::Prob(fitter_mu12.chi2(), fitter_mu12.dof()) : -1.)); 
         // * mu_2 - mu_3
         KinVtxFitter fitter_mu23({ttracks->at(l2_idx), ttracks->at(l3_idx)}, {l2_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
-        muon_triplet.addUserFloat("mu23_vtxFitProb", (fitter_mu23.success() ? fitter_mu23.prob() : -1.));
+        muon_triplet.addUserFloat("mu23_vtxFitProb", (fitter_mu23.success() ? TMath::Prob(fitter_mu23.chi2(), fitter_mu23.dof()) : -1.)); 
         // * mu_1 - mu_3
         KinVtxFitter fitter_mu13({ttracks->at(l1_idx), ttracks->at(l3_idx)}, {l1_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
-        muon_triplet.addUserFloat("mu13_vtxFitProb", (fitter_mu13.success() ? fitter_mu13.prob() : -1.));
+        muon_triplet.addUserFloat("mu13_vtxFitProb", (fitter_mu13.success() ? TMath::Prob(fitter_mu13.chi2(), fitter_mu13.dof()) : -1.)); 
 
        // VETO di-muon resonances 
        bool isToVeto = vetoResonances(evt, {l1_idx,l2_idx,l3_idx}, &muon_triplet);
