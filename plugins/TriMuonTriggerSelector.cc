@@ -331,6 +331,7 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
       muons_out->back().addUserInt("trackQuality", 999);
     else
       muons_out->back().addUserInt("trackQuality", (muon.innerTrack()->quality(reco::TrackBase::highPurity)));
+    muons_out->back().addUserFloat("z", muon.vz());
     muons_out->back().addUserFloat("dZpv", muon.muonBestTrack()->dz(PV.position()));
     muons_out->back().addUserFloat("err_dZpv", muon.muonBestTrack()->dzError());
 
