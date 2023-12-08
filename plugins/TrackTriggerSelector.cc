@@ -5,7 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -39,17 +39,18 @@ using namespace std;
 
 constexpr bool debug = false;
 
-class TrackTriggerSelector : public edm::EDProducer {
+class TrackTriggerSelector : public edm::global::EDProducer <> {
   
 public:
     
   explicit TrackTriggerSelector(const edm::ParameterSet &iConfig);
     
   ~TrackTriggerSelector() override {};
+
+  void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const ;
   
 private:
   
-  virtual void produce(edm::Event&, const edm::EventSetup&);
 
   reco::Track fix_track(const reco::Track *tk, double delta) const;  
 
@@ -74,7 +75,8 @@ private:
 };
 
 TrackTriggerSelector::TrackTriggerSelector(const edm::ParameterSet &iConfig):
-  bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+  //bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+  bFieldToken_(esConsumes()),
   beamSpotSrc_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"))),
   tracksToken_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("tracks"))),
   lostTracksToken_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("lostTracks"))),
@@ -94,7 +96,7 @@ TrackTriggerSelector::TrackTriggerSelector(const edm::ParameterSet &iConfig):
   produces<TransientTrackCollection>("SelectedTransientTracks");  
 }
 
-void TrackTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
 
   // Inputs
   edm::Handle<reco::BeamSpot> beamSpotHandle;
@@ -175,7 +177,7 @@ void TrackTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iS
 
     // Loop over trigger paths
     int ipath=-1;
-    for (const std::string path: HLTPaths_){
+    for (const std::string &path: HLTPaths_){
       
       if(debug) std::cout << "ipath = " << ipath << ", path = " << path << std::endl;
       if(debug) std::cout << std::endl;

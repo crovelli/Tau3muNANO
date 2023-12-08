@@ -301,7 +301,7 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
       // Loop over trigger paths
       int ipath=-1;
-      for (const std::string path: HLTPaths_){
+      for (const std::string& path: HLTPaths_){
 	
 	if(debug) std::cout << "ipath = " << ipath << ", path = " << path << std::endl;
 	if(debug) std::cout << std::endl;

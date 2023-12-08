@@ -7,7 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -35,17 +35,17 @@ using namespace std;
 
 constexpr bool debug = false;
 
-class TriMuonTriggerSelector : public edm::EDProducer {
+class TriMuonTriggerSelector : public edm::global::EDProducer <> {
   
 public:
     
   explicit TriMuonTriggerSelector(const edm::ParameterSet &iConfig);
     
   ~TriMuonTriggerSelector() override {};
+  void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
   
 private:
   
-  virtual void produce(edm::Event&, const edm::EventSetup&);
 
   reco::Track fix_track(const reco::Track *tk, double delta) const;  
 
@@ -89,7 +89,7 @@ TriMuonTriggerSelector::TriMuonTriggerSelector(const edm::ParameterSet &iConfig)
   produces<pat::MuonCollection>("trgMuons");
 }
 
-void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void TriMuonTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
   // Inputs
   const auto& bField = iSetup.getData(bFieldToken_);
 
@@ -153,7 +153,7 @@ void TriMuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& 
 
     // Loop over trigger paths
     int ipath=-1;
-    for (const std::string path: HLTPaths_){
+    for (const std::string& path: HLTPaths_){
       
       if(debug) std::cout << "ipath = " << ipath << ", path = " << path << std::endl;
       if(debug) std::cout << std::endl;
