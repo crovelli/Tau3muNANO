@@ -3,8 +3,8 @@
 ## Getting started
 
 ```shell
-cmsrel CMSSW_12_4_11
-cd CMSSW_12_4_11/src
+cmsrel CMSSW_13_0_13
+cd CMSSW_13_0_13/src
 cmsenv
 git cms-init
 ```
