@@ -19,6 +19,8 @@ IsolationComputer::IsolationComputer(
     dBetaValue_ = dBetaValue;
     pT_treshold_ = pT_treshold;
 
+    const bool debug = false;    
+    if(debug) std::cout << " [IsoComputer]> pT threshold " << pT_treshold << std::endl;
 
     // divide PF candidates in neutral / charged / PU-charged
     for(const pat::PackedCandidate &p : *PFcandCollection_){

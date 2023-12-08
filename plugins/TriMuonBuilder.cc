@@ -259,34 +259,36 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         KinVtxFitter fitter_mu13({ttracks->at(l1_idx), ttracks->at(l3_idx)}, {l1_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
         muon_triplet.addUserFloat("mu13_vtxFitProb", (fitter_mu13.success() ? TMath::Prob(fitter_mu13.chi2(), fitter_mu13.dof()) : -1.)); 
 
-       // VETO di-muon resonances 
-       bool isToVeto = vetoResonances(evt, {l1_idx,l2_idx,l3_idx}, &muon_triplet);
-       muon_triplet.addUserInt("diMuVtxFit_toVeto", isToVeto);
+        // VETO di-muon resonances 
+        bool isToVeto = vetoResonances(evt, {l1_idx,l2_idx,l3_idx}, &muon_triplet);
+        muon_triplet.addUserInt("diMuVtxFit_toVeto", isToVeto);
 
-      // Tau candidate ISOLATION
-      // custom class ... to check carefully
-       IsolationComputer isoComputer = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, 0.2, dBetaCone_);
-      isoComputer.addMuonsToVeto({l1_ptr, l2_ptr, l3_ptr});
-      float ptChargedFromPV = isoComputer.pTcharged_iso(muon_triplet);
-      float ptChargedFromPU = isoComputer.pTcharged_PU(muon_triplet);
-      float ptPhotons = isoComputer.pTphoton(muon_triplet);
-      float ptChargedForHLT = isoComputer.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
-      // class initiated with outer beta cone radius (NOT WORKING!!)
-      //heppy::IsolationComputer isoComputer = heppy::IsolationComputer(dBetaCone_);
-      //isoComputer.setPackedCandidates(pkdPFcand, -1, 0.2, 9999, true); // std::vector<pat::PackedCandidate>, fromPV_thresh, dz_thresh, dxy_thresh, also_leptons
-      //float ptChargedFromPV = isoComputer.chargedAbsIso(muon_triplet, isoRadius_, 0., 0.5);
-      //float ptChargedFromPU = isoComputer.puAbsIso(muon_triplet, dBetaCone_, 0., 0.5);
-      //float ptPhotons       = isoComputer.photonAbsIsoRaw(muon_triplet, dBetaCone_, 0., 0.5);
-      float TauAbsIsolation = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
+        // Tau candidate ISOLATION
+        // custom class ... to check carefully
+        const float iso_pT_threshold = 0.0; // form Luca's code
+        const float iso_dZmax = 0.2; // cm
+        IsolationComputer isoComputer = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, iso_dZmax, dBetaCone_,dBetaValue_, iso_pT_threshold);
+        isoComputer.addMuonsToVeto({l1_ptr, l2_ptr, l3_ptr});
+        float ptChargedFromPV = isoComputer.pTcharged_iso(muon_triplet);
+        float ptChargedFromPU = isoComputer.pTcharged_PU(muon_triplet);
+        float ptPhotons = isoComputer.pTphoton(muon_triplet);
+        float ptChargedForHLT = isoComputer.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
+        // class initiated with outer beta cone radius (NOT WORKING!!)
+        //heppy::IsolationComputer isoComputer = heppy::IsolationComputer(dBetaCone_);
+        //isoComputer.setPackedCandidates(pkdPFcand, -1, 0.2, 9999, true); // std::vector<pat::PackedCandidate>, fromPV_thresh, dz_thresh, dxy_thresh, also_leptons
+        //float ptChargedFromPV = isoComputer.chargedAbsIso(muon_triplet, isoRadius_, 0., 0.5);
+        //float ptChargedFromPU = isoComputer.puAbsIso(muon_triplet, dBetaCone_, 0., 0.5);
+        //float ptPhotons       = isoComputer.photonAbsIsoRaw(muon_triplet, dBetaCone_, 0., 0.5);
+        float TauAbsIsolation = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
 
-      // useful quantities for BDT
-      // muons longitudinal distance
-      float dz_mu12 = ( (l1_ptr->hasUserFloat("dZpv") && l2_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l2_ptr->userFloat("dZpv")) : -1 );
-      float dz_mu13 = ( (l1_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
-      float dz_mu23 = ( (l2_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l2_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
+        // useful quantities for BDT
+        // muons longitudinal distance
+        float dz_mu12 = ( (l1_ptr->hasUserFloat("dZpv") && l2_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l2_ptr->userFloat("dZpv")) : -1 );
+        float dz_mu13 = ( (l1_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
+        float dz_mu23 = ( (l2_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l2_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
 
 
-      // HLT / offline match for the last HLT filter (building the tau candidate)
+        // HLT / offline match for the last HLT filter (building the tau candidate)
       
       // These vectors have one entry per HLT path
       std::vector<int> frs(HLTPaths_.size(),0);              

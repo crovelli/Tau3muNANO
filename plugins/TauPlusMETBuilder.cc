@@ -48,7 +48,7 @@ private:
     const edm::EDGetTokenT<pat::METCollection> PuppiMet_;
     //const edm::EDGetTokenT<pat::METCollection> DeepMet_;
 
-    bool debug = true;
+    bool debug = false;
 
     std::pair<double, double> longMETsolutions( TLorentzVector&,  TLorentzVector &) const;
 
