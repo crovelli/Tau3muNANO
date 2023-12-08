@@ -3,12 +3,12 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('isMC', False,
+options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
 )
-options.register('isPreECALleakage',True,
+options.register('isPreECALleakage',False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Data taken during ECAL leakage"
@@ -39,21 +39,22 @@ options.register('skip', 0,
     "skip first N events"
 )
 
-options.setDefault('maxEvents', -1)
-#options.setDefault('maxEvents', 1000)
-tag = '2022E_pTiso00' if options.isPreECALleakage else 'provaECALleak'
+#options.setDefault('maxEvents', -1)
+options.setDefault('maxEvents', 1000)
+tag = '2022' if options.isPreECALleakage else '2022EE'
 options.setDefault('tag', tag)
 options.parseArguments()
 
 # global tags:
-# MC pre ECAL leakage:  124X_mcRun3_2022_realistic_v12
-# MC post ECAL leakage: 124X_mcRun3_2022_realistic_postEE_v1
-# 2022 ABCDE ReReco : 124X_dataRun3_v15
-# 2022 FG Prompt : 124X_dataRun3_PromptAnalysis_v2
+#    (!) december 2023 - reminiAOD for eras 
+# MC pre ECAL leakage  : 130X_mcRun3_2022_realistic_v5
+# MC post ECAL leakage : 130X_mcRun3_2022_realistic_postEE_v6
+# 2022 ABCDE ReReco    : 130X_dataRun3_v2
+# 2022 FG Prompt       : 130X_mcRun3_2022_realistic_postEE_v6 
 if not options.isMC :
-    globaltag = '124X_dataRun3_v15' 
+    globaltag = '130X_dataRun3_v2' 
 else :
-    globaltag = '124X_mcRun3_2022_realistic_v12' if options.isPreECALleakage else '124X_mcRun3_2022_realistic_postEE_v1'
+    globaltag = '130X_mcRun3_2022_realistic_v5' if options.isPreECALleakage else '130X_mcRun3_2022_realistic_postEE_v6'
 
 
 if options._beenSet['globalTag']:
@@ -65,8 +66,8 @@ outputFileFEVT = cms.untracked.string('_'.join(['xFullEvt', extension[options.is
 if not options.inputFiles :
     if options.isMC :
         # signal channel
-        options.inputFiles = ['/store/mc/Run3Summer22MiniAODv3/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v2/2820000/0b14e03f-168c-4e39-b441-d1b949ee4890.root'] if options.isPreECALleakage else \
-                            ['/store/mc/Run3Summer22EEMiniAODv3/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2810000/975d40c3-629d-41e5-8887-cb34ca21e308.root']
+        options.inputFiles = ['/store/mc/Run3Summer22MiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_v5-v2/2540000/956f1823-037d-4a9c-aa2f-50dcf5936f83.root'] if options.isPreECALleakage else \
+                            ['/store/mc/Run3Summer22EEMiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2530000/6965991a-4aea-4d25-84b9-82404f0d2b64.root']
         # control channel
         #options.inputFiles = ['/store/mc/Run3Summer22MiniAODv3/DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v2/2810000/0da9edba-f8b9-4e0c-8be1-282cdd2b5685.root'] if options.isPreECALleakage else \
         #                     ['/store/mc/Run3Summer22EEMiniAODv3/DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2810000/00589525-be33-4abd-af78-428bb9ace158.root']
@@ -94,7 +95,7 @@ process.load('PhysicsTools.Tau3muNANO.nanoTau3Mu_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-#process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
+process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 )
@@ -145,7 +146,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.Tau3muNANO.nanoTau3Mu_cff import *
 process = nanoAOD_customizeMuonTriggerTau3Mu(process)
-process = nanoAOD_customizeTrackTau3Mu(process)
+#process = nanoAOD_customizeTrackTau3Mu(process)
 process = nanoAOD_customizeWnuTau3Mu(process)
 process = nanoAOD_customizeTriggerBitsTau3Mu(process)
 
