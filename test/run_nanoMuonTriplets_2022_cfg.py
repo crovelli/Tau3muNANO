@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('isMC', True,
+options.register('isMC', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
@@ -41,7 +41,7 @@ options.register('skip', 0,
 
 options.setDefault('maxEvents', -1)
 #options.setDefault('maxEvents', 1000)
-tag = 'prova' if options.isPreECALleakage else 'provaECALleak'
+tag = '2022E_pTiso00' if options.isPreECALleakage else 'provaECALleak'
 options.setDefault('tag', tag)
 options.parseArguments()
 
@@ -67,7 +67,11 @@ if not options.inputFiles :
         options.inputFiles = ['/store/mc/Run3Summer22MiniAODv3/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v2/2820000/0b14e03f-168c-4e39-b441-d1b949ee4890.root'] if options.isPreECALleakage else \
                             ['/store/mc/Run3Summer22EEMiniAODv3/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2810000/975d40c3-629d-41e5-8887-cb34ca21e308.root']
     else :
-        options.inputFiles = []
+        options.inputFiles = ['/store/data/Run2022E/ParkingDoubleMuonLowMass0/MINIAOD/PromptReco-v1/000/359/569/00000/5d97d00e-d526-4970-bb14-d615c1aab475.root',
+                              '/store/data/Run2022E/ParkingDoubleMuonLowMass0/MINIAOD/PromptReco-v1/000/359/571/00000/46434a84-3c20-4f3a-9b16-4c25d1d8fe82.root',
+                              '/store/data/Run2022E/ParkingDoubleMuonLowMass0/MINIAOD/PromptReco-v1/000/359/602/00000/0bb7b703-a39a-47b4-8f16-c596462a273b.root',
+                              '/store/data/Run2022E/ParkingDoubleMuonLowMass0/MINIAOD/PromptReco-v1/000/359/597/00000/fdba132d-a85c-483e-82c9-53174fb903e7.root',
+        ]
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 #from Configuration.StandardSequences.Eras import eras
