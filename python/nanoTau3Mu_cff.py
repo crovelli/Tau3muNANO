@@ -13,7 +13,7 @@ from PhysicsTools.Tau3muNANO.genparticlesT3m_cff import * # define new
 from PhysicsTools.Tau3muNANO.particlelevelT3m_cff import * # define new
 from PhysicsTools.Tau3muNANO.triggerObjectsTau3Mu_cff import * #define new
 from PhysicsTools.Tau3muNANO.muonsTau3mu_cff import * # define new 
-
+from PhysicsTools.Tau3muNANO.tracksTau3mu_cff import * # define new    
 
 ## W collections
 from PhysicsTools.Tau3muNANO.Wnu_Tau3Mu import * #define new
@@ -33,16 +33,15 @@ def nanoAOD_customizeMuonTriggerTau3Mu(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + muonT3mSequence + muonT3mTables)
     return process
 
-#def nanoAOD_customizeTrackFilteredX(process):
-#    process.nanoSequence = cms.Sequence( process.nanoSequence + tracksXSequence + tracksXTables)
-#    return process
+def nanoAOD_customizeTrackTau3Mu(process):   
+    process.nanoSequence = cms.Sequence( process.nanoSequence + trackT3mSequence + trackT3mTables)  
+    return process   
 
 def nanoAOD_customizeTriggerBitsTau3Mu(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + trgTables)
     return process
 
 def nanoAOD_customizeWnuTau3Mu(process):
-    #process.nanoB0ToK0XSequence = cms.Sequence( Tau3MuSequence + Tau3MuTableSequence )
     process.nanoWnuTau3MuSequence = cms.Sequence( Tau3MuSequence + Tau3MuTableSequence + TauPlusMetSequence + TauPlusMetTableSequence)
     return process
 
@@ -52,9 +51,9 @@ def nanoAOD_customizeMC(process):
     for name, path in process.paths.iteritems():
         # replace all the non-match embedded inputs with the matched ones
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:SelectedMuons', 'selectedMuonsMCMatchEmbedded')
-        #massSearchReplaceAnyInputTag(path, 'tracksX:SelectedTracks', 'tracksXMCMatchEmbedded')
+        massSearchReplaceAnyInputTag(path, 'trackTrgSelector:SelectedTracks', 'trackT3mMCMatchEmbedded')  
 
         # modify the path to include mc-specific info
         path.insert(0, nanoSequenceMC)
         path.replace(process.muonT3mSequence, process.muonT3mMC)
-        #path.replace(process.tracksXSequence, process.tracksXMC)
+        path.replace(process.trackT3mSequence, process.trackT3mMC)
