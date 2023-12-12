@@ -18,13 +18,19 @@ from PhysicsTools.Tau3muNANO.muonsTau3mu_cff import * # define new
 ## W collections
 from PhysicsTools.Tau3muNANO.Wnu_Tau3Mu import * #define new
 
-
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectTau3MuTables + l1bits)
 
-nanoSequence = cms.Sequence(nanoMetadata + 
-                            cms.Sequence(vertexTask) + cms.Sequence(metTablesTask) +           
-                            cms.Sequence(globalTablesTask) + cms.Sequence(vertexTablesTask) +
-                            triggerObjectTau3MuTables + l1bits)
+vertexTable.svSrc = cms.InputTag("slimmedSecondaryVertices")
+
+nanoSequence = cms.Sequence(nanoMetadata + #nanoSequenceCommon + 
+                            #cms.Sequence(cms.Task(linkedObjects)) +
+                            cms.Sequence(vertexTask) + 
+                            cms.Sequence(vertexTablesTask) +
+                            cms.Sequence(metTablesTask) +           
+                            cms.Sequence(globalTablesTask) + 
+                            triggerObjectTau3MuTables + 
+                            l1bits
+)
 
 nanoSequenceMC = cms.Sequence(particleLevelT3mSequence + genParticleT3mSequence + cms.Sequence(metMCTask) + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleT3mTables + lheInfoTable)
