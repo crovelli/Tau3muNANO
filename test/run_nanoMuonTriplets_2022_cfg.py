@@ -41,7 +41,7 @@ options.register('skip', 0,
 
 #options.setDefault('maxEvents', -1)
 options.setDefault('maxEvents', 1000)
-tag = '2022' if options.isPreECALleakage else '2022EE'
+tag = '2022_SV' if options.isPreECALleakage else '2022EE_SV'
 options.setDefault('tag', tag)
 options.parseArguments()
 
@@ -52,7 +52,8 @@ options.parseArguments()
 # 2022 ABCDE ReReco    : 130X_dataRun3_v2
 # 2022 FG Prompt       : 130X_mcRun3_2022_realistic_postEE_v6 
 if not options.isMC :
-    globaltag = '130X_dataRun3_v2' 
+    globaltag = '130X_dataRun3_PromptAnalysis_v1'
+ 
 else :
     globaltag = '130X_mcRun3_2022_realistic_v5' if options.isPreECALleakage else '130X_mcRun3_2022_realistic_postEE_v6'
 
