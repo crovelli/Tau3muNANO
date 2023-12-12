@@ -91,20 +91,14 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
             std::cout << " [ERROR] tau candidate is fault..." << std::endl;
         }
 
-        // W boson in the transverse plane
-        TLorentzVector MetP4, WcandP4, PuppiMetP4, WcandPuppiP4, DeepMetP4, WcandDeepP4;
+        // MET P4 in the transverse plane
+        TLorentzVector MetP4, PuppiMetP4, DeepMetP4;
         
         MetP4.SetPtEtaPhiM(met.pt(), 0.0, met.phi(), 0);
         PuppiMetP4.SetPtEtaPhiM(PuppiMet.pt(), 0.0, PuppiMet.phi(), 0);
         DeepMetP4.SetPtEtaPhiM(met.corPt(DeepMETcorr), 0.0, met.corPhi(DeepMETcorr), 0);
 
-        WcandP4.SetPtEtaPhiM((MetP4 + tauCandP4).Perp(), 0.0, (MetP4 + tauCandP4).Phi(), W_MASS);
-        WcandPuppiP4.SetPtEtaPhiM((PuppiMetP4 + tauCandP4).Perp(), 0.0, (PuppiMetP4 + tauCandP4).Phi(), W_MASS);
-        WcandDeepP4.SetPtEtaPhiM((DeepMetP4 + tauCandP4).Perp(), 0.0, (DeepMetP4 + tauCandP4).Phi(), W_MASS);
-        pat::CompositeCandidate TauPlusMET;
-        TauPlusMET.setCharge(tau.charge());
-        
-        // missing longitudinal momentum
+        // 2 sol. for missing longitudinal momentum
         std::pair<double,double> MET_missPz(longMETsolutions(MetP4,tauCandP4));
         std::pair<double,double> PuppiMET_missPz(longMETsolutions(PuppiMetP4,tauCandP4));
         std::pair<double,double> DeepMET_missPz(longMETsolutions(DeepMetP4,tauCandP4));
@@ -113,6 +107,30 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
         float Tau_mT = std::sqrt(2. * tauCandP4.Perp()* MetP4.Pt() * (1 - std::cos(tauCandP4.Phi()-MetP4.Phi())));
         float Tau_Puppi_mT = std::sqrt(2. * tauCandP4.Perp()* PuppiMetP4.Pt() * (1 - std::cos(tauCandP4.Phi()-PuppiMetP4.Phi())));
         float Tau_Deep_mT = std::sqrt(2. * tauCandP4.Perp()* DeepMetP4.Pt() * (1 - std::cos(tauCandP4.Phi()-DeepMetP4.Phi())));
+
+        // W P4 with 2 sol. for missing Pz 
+        TLorentzVector WcandP4_min, WcandP4_max, WcandPuppiP4_min, WcandPuppiP4_max, WcandDeepP4_min, WcandDeepP4_max;
+        TLorentzVector MetP4_min, MetP4_max, PuppiMetP4_min, PuppiMetP4_max, DeepMetP4_min, DeepMetP4_max;  
+
+        //WcandP4.SetPtEtaPhiM((MetP4 + tauCandP4).Perp(), 0.0, (MetP4 + tauCandP4).Phi(), W_MASS);
+        MetP4_min = MetP4; MetP4_max = MetP4;
+        MetP4_min.SetPz(MET_missPz.first); MetP4_max.SetPz(MET_missPz.second); 
+        WcandP4_min = MetP4_min + tauCandP4;
+        WcandP4_max = MetP4_max + tauCandP4;
+        //WcandPuppiP4.SetPtEtaPhiM((PuppiMetP4 + tauCandP4).Perp(), 0.0, (PuppiMetP4 + tauCandP4).Phi(), W_MASS);
+        PuppiMetP4_min = PuppiMetP4; PuppiMetP4_max = PuppiMetP4;
+        PuppiMetP4_min.SetPz(PuppiMET_missPz.first); PuppiMetP4_max.SetPz(PuppiMET_missPz.second); 
+        WcandPuppiP4_min = PuppiMetP4_min + tauCandP4;
+        WcandPuppiP4_max = PuppiMetP4_max + tauCandP4;
+        //WcandDeepP4.SetPtEtaPhiM((DeepMetP4 + tauCandP4).Perp(), 0.0, (DeepMetP4 + tauCandP4).Phi(), W_MASS);
+        DeepMetP4_min = DeepMetP4; DeepMetP4_max = DeepMetP4;
+        DeepMetP4_min.SetPz(DeepMET_missPz.first); DeepMetP4_max.SetPz(DeepMET_missPz.second);
+        WcandDeepP4_min = DeepMetP4_min + tauCandP4;
+        WcandDeepP4_max = DeepMetP4_max + tauCandP4;
+
+        pat::CompositeCandidate TauPlusMET;
+        TauPlusMET.setCharge(tau.charge());
+        
 
 
         // save variables
@@ -133,16 +151,25 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
         TauPlusMET.addUserFloat("DeepMETminPz", DeepMET_missPz.first);
         TauPlusMET.addUserFloat("DeepMETmaxPz", DeepMET_missPz.second);
         // Tau + MET ~ W candidate
-        TauPlusMET.addUserFloat("pt", WcandP4.Pt());
-        TauPlusMET.addUserFloat("Puppi_pt", WcandPuppiP4.Pt());
-        TauPlusMET.addUserFloat("Deep_pt", WcandDeepP4.Pt());
-        TauPlusMET.addUserFloat("eta", WcandP4.Eta());
-        TauPlusMET.addUserFloat("Puppi_eta", WcandPuppiP4.Eta());
-        TauPlusMET.addUserFloat("Deep_eta", WcandDeepP4.Eta());
-        TauPlusMET.addUserFloat("phi", WcandP4.Phi());
-        TauPlusMET.addUserFloat("Puppi_phi", WcandDeepP4.Phi());
-        TauPlusMET.addUserFloat("Deep_phi", WcandDeepP4.Phi());
-        TauPlusMET.addUserFloat("mass", WcandP4.M());
+        TauPlusMET.addUserFloat("pt", (WcandP4_min.Pt() == WcandP4_max.Pt() ? WcandP4_min.Pt() : -1.0 ));
+        TauPlusMET.addUserFloat("Puppi_pt", (WcandPuppiP4_min.Pt() == WcandPuppiP4_max.Pt() ? WcandPuppiP4_min.Pt() : -1.0 ));
+        TauPlusMET.addUserFloat("Deep_pt", (WcandDeepP4_min.Pt() == WcandDeepP4_max.Pt()? WcandDeepP4_min.Pt() : -1.0 ));
+        TauPlusMET.addUserFloat("eta_min", WcandP4_min.Eta());
+        TauPlusMET.addUserFloat("eta_max", WcandP4_max.Eta());
+        TauPlusMET.addUserFloat("Puppi_eta_min", WcandPuppiP4_min.Eta());
+        TauPlusMET.addUserFloat("Puppi_eta_max", WcandPuppiP4_max.Eta());
+        TauPlusMET.addUserFloat("Deep_eta_min", WcandDeepP4_min.Eta());
+        TauPlusMET.addUserFloat("Deep_eta_max", WcandDeepP4_max.Eta());
+        TauPlusMET.addUserFloat("phi", WcandP4_min.Phi());
+        TauPlusMET.addUserFloat("Puppi_phi", WcandPuppiP4_min.Phi());
+        TauPlusMET.addUserFloat("Deep_phi", WcandDeepP4_min.Phi());
+        TauPlusMET.addUserFloat("mass_min", WcandP4_min.M());
+        TauPlusMET.addUserFloat("mass_max", WcandP4_max.M());
+        TauPlusMET.addUserFloat("Puppi_mass_min", WcandPuppiP4_min.M());
+        TauPlusMET.addUserFloat("Puppi_mass_max", WcandPuppiP4_max.M());
+        TauPlusMET.addUserFloat("Deep_mass_min", WcandDeepP4_min.M());
+        TauPlusMET.addUserFloat("Deep_mass_max", WcandDeepP4_max.M());
+        TauPlusMET.addUserFloat("mass_nominal", W_MASS);
 
         // push in the event
         ret_value->push_back(TauPlusMET);
@@ -161,6 +188,15 @@ std::pair<double, double> TauPlusMETBuilder::longMETsolutions(TLorentzVector& me
 
     bool verbose = false;
     double min_missPz = -999 , max_missPz = -999;
+   
+    // equation Pw = missP + P
+    //
+    // (E** - Pz**) missPz** + 2(A*Pz) * missPz + (E** - A**) = 0
+    // a = E** - Pz**
+    //   missPz** + 2b  * missPz + c = 0
+    // b = (A*Pz)/a
+    // c = (E** - A**)/a
+
     double A = 0.5 * ( W_MASS*W_MASS - TriMuP4.M()*TriMuP4.M() ) + TriMuP4.Px()*metP4.Px() + TriMuP4.Py()*metP4.Py();
 
     double denom = TriMuP4.E()*TriMuP4.E() - TriMuP4.Pz()*TriMuP4.Pz();
