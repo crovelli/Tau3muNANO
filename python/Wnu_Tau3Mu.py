@@ -9,29 +9,28 @@ Path=Path2022
 
 # Tau -> 3mu
 muonTripletForTau3Mu = cms.EDProducer('TriMuonBuilder',
-    src = cms.InputTag('triMuonTrgSelector', 'SelectedMuons'),
-    transientTracksSrc = cms.InputTag('triMuonTrgSelector', 'SelectedTransientMuons'),
+    src                 = cms.InputTag('triMuonTrgSelector', 'SelectedMuons'),
+    transientTracksSrc  = cms.InputTag('triMuonTrgSelector', 'SelectedTransientMuons'),
     packedCandidatesSrc = cms.InputTag('packedPFCandidates'),
-    #met = cms.InputTag('slimmedMETs'),
-    #PuppiMet = cms.InputTag('slimmedMETsPuppi'),
-    beamSpot   = cms.InputTag("offlineBeamSpot"),
-    bits = cms.InputTag("TriggerResults","","HLT"), 
-    objects = cms.InputTag("slimmedPatTrigger"),                                         
+    beamSpot            = cms.InputTag("offlineBeamSpot"),
+    vertices            = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    bits                = cms.InputTag("TriggerResults","","HLT"), 
+    objects             = cms.InputTag("slimmedPatTrigger"),                                         
     # selection definition
-    lep1Selection = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
-    lep2Selection = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
-    lep3Selection = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
+    lep1Selection   = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
+    lep2Selection   = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
+    lep3Selection   = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
     preVtxSelection = cms.string('mass() < 3 && abs(charge()) == 1'), # selection for tau candidates pre-fit
-    postVtxSelection =  cms.string('userInt("vtx_isValid")'),
+    postVtxSelection= cms.string('userInt("vtx_isValid")'),
     # trigger
-    HLTPaths=cms.vstring(Path),                                                                        
+    HLTPaths          = cms.vstring(Path),                                                                        
     drForTriggerMatch = cms.double(0.1), 
     # isolation parameters
-    isoRadius = cms.double(0.4), # dR of the isolation cone
+    isoRadius       = cms.double(0.4), # dR of the isolation cone
     isoRadiusForHLT = cms.double(0.8), # dR of the isolation cone applied at HLT level
-    MaxDZForHLT = cms.double(0.3), # dZ tau-track for isolation
-    dBetaCone = cms.double(0.8),
-    dBetaValue = cms.double(0.2), # optimised for Run2... check validity for Run3
+    MaxDZForHLT     = cms.double(0.3), # dZ tau-track for isolation
+    dBetaCone       = cms.double(0.8),
+    dBetaValue      = cms.double(0.2), # optimised for Run2... check validity for Run3
 )
 
 # W -> Tau + MET
@@ -72,14 +71,18 @@ Tau3MuTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
         fitted_phi  = ufloat('fitted_phi'),
         fitted_mass = ufloat("fitted_mass"),
         fitted_mass_err2 = ufloat("fitted_mass_err2"),
-        
-        #MET_pt = ufloat('MET_pt'),
-        #mT = ufloat("mT"), 
-        #MET_isPf = uint('MET_isPf'),
-        #PuppiMET_pt = ufloat('PuppiMET_pt'),
-        #Puppi_mT = ufloat("Puppi_mT"), 
-        #PuppiMET_isPf = uint('PuppiMET_isPf'),
 
+        PV_x = ufloat('PV_x'),
+        PV_y = ufloat('PV_y'),
+        PV_z = ufloat('PV_z'),
+
+        PVrefit_isValid = ufloat('PVrefit_isValid'), 
+        PVrefit_chi2 = ufloat('PVrefit_chi2'), 
+        PVrefit_ndof = ufloat('PVrefit_ndof'), 
+        PVrefit_x = ufloat('PVrefit_x'),
+        PVrefit_y = ufloat('PVrefit_y'),
+        PVrefit_z = ufloat('PVrefit_z'),
+        
         diMuVtxFit_bestProb = ufloat("diMuVtxFit_bestProb"),
         diMuVtxFit_bestMass = ufloat("diMuVtxFit_bestMass"),
         diMuVtxFit_toVeto   = uint("diMuVtxFit_toVeto"),
@@ -90,9 +93,18 @@ Tau3MuTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
         iso_ptChargedForHLT = ufloat("iso_ptChargedForHLT"),
         absIsolation        = ufloat("absIsolation"),
 
+        iso_ptChargedFromPV_pT05 = ufloat("iso_ptChargedFromPV_pT05"),
+        iso_ptChargedFromPU_pT05 = ufloat("iso_ptChargedFromPU_pT05"),
+        iso_ptPhotons_pT05 = ufloat("iso_ptPhotons_pT05"),
+        iso_ptChargedForHLT_pT05 = ufloat("iso_ptChargedForHLT_pT05"),
+        absIsolation_pT05 = ufloat("absIsolation_pT05"),
+
         dZmu12 = ufloat('dZmu12'),
+        mu12_fit_mass = ufloat('mu12_fit_mass'),
         dZmu13 = ufloat('dZmu13'),
+        mu13_fit_mass = ufloat('mu13_fit_mass'),
         dZmu23 = ufloat('dZmu23'),
+        mu23_fit_mass = ufloat('mu23_fit_mass'),
         Lxy_3muVtxBS = ufloat('Lxy_3muVtxBS'),
         errLxy_3muVtxBS = ufloat('errLxy_3muVtxBS'),
         sigLxy_3muVtxBS = ufloat('sigLxy_3muVtxBS'),
@@ -150,31 +162,40 @@ TauPlusMetTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
     extension=cms.bool(False),
     variables=cms.PSet(
         charge = uint("charge"),
-        mass   = ufloat("mass"),
+        mass_nominal   = ufloat("mass_nominal"),
         # PF MET type1 correction
         MET_pt   = ufloat('MET_pt'),
         Tau_mT   = ufloat('Tau_mT'),
         pt       = ufloat("pt"),
-        eta      = ufloat("eta"),
+        eta_min      = ufloat("eta_min"),
+        eta_max      = ufloat("eta_max"),
         phi      = ufloat("phi"),
+        mass_min = ufloat('mass_min'),
+        mass_max = ufloat('mass_max'),
         METminPz = ufloat('METminPz'),
         METmaxPz = ufloat('METmaxPz'),
         # Puppi correction to MET
         PuppiMET_pt  = ufloat('PuppiMET_pt'),
         Tau_Puppi_mT = ufloat('Tau_Puppi_mT'),
         Puppi_pt     = ufloat("Puppi_pt"),
-        Puppi_eta    = ufloat("Puppi_eta"),
+        Puppi_eta_min    = ufloat("Puppi_eta_min"),
+        Puppi_eta_max    = ufloat("Puppi_eta_max"),
         Puppi_phi    = ufloat("Puppi_phi"),
+        Puppi_mass_min = ufloat('Puppi_mass_min'),
+        Puppi_mass_max = ufloat('Puppi_mass_max'),
         PuppiMETminPz= ufloat('PuppiMETminPz'),
         PuppiMETmaxPz= ufloat('PuppiMETmaxPz'),
         # Deep MET correction
         DeepMET_pt  = ufloat('DeepMET_pt'),
         Tau_Deep_mT = ufloat('Tau_Deep_mT'),
         Deep_pt     = ufloat("Deep_pt"),
-        Deep_eta    = ufloat("Deep_eta"),
+        Deep_eta_min    = ufloat("Deep_eta_min"),
+        Deep_eta_max    = ufloat("Deep_eta_max"),
         Deep_phi    = ufloat("Deep_phi"),
         DeepMETminPz= ufloat('DeepMETminPz'),
-        DeepMETmaxPz= ufloat('DeepMETmaxPz')
+        DeepMETmaxPz= ufloat('DeepMETmaxPz'),
+        Deep_mass_min = ufloat('Deep_mass_min'),
+        Deep_mass_max = ufloat('Deep_mass_max'),
     
     )
 )

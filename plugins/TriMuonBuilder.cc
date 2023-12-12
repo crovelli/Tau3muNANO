@@ -25,9 +25,13 @@
 #include "DataFormats/PatCandidates/interface/TriggerAlgorithm.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
 
 #include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicVertex.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/KinematicState.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicParticle.h"
@@ -55,6 +59,7 @@ public:
   typedef std::vector<pat::Muon> MuonCollection;
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
   typedef std::vector<pat::PackedCandidate> PackedCandidatesCollection;
+  typedef std::vector<reco::Vertex> VertexCollection;
 
   explicit TriMuonBuilder(const edm::ParameterSet &cfg):
     l1_selection_{cfg.getParameter<std::string>("lep1Selection")},
@@ -65,9 +70,9 @@ public:
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )},
     pkdCand_src_{consumes<PackedCandidatesCollection>( cfg.getParameter<edm::InputTag>("packedCandidatesSrc") )},
-    //met_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("met") )},
-    //PuppiMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("PuppiMet") )},
     beamSpotSrc_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )},
+    vertexSrc_{consumes<VertexCollection>( cfg.getParameter<edm::InputTag>("vertices") )},
+    theTransientTrackBuilder_{esConsumes<TransientTrackBuilder, TransientTrackRecord>()},
     triggerBits_{consumes<edm::TriggerResults>( cfg.getParameter<edm::InputTag>("bits") )},
     triggerObjects_{consumes<std::vector<pat::TriggerObjectStandAlone>>( cfg.getParameter<edm::InputTag>("objects") )},
     HLTPaths_{cfg.getParameter<std::vector<std::string>>("HLTPaths")},
@@ -99,9 +104,9 @@ private:
   const edm::EDGetTokenT<MuonCollection> src_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
   const edm::EDGetTokenT<PackedCandidatesCollection> pkdCand_src_;
-  //const edm::EDGetTokenT<pat::METCollection> met_;
-  //const edm::EDGetTokenT<pat::METCollection> PuppiMet_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
+  const edm::EDGetTokenT<VertexCollection> vertexSrc_;
+  const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> theTransientTrackBuilder_;
   const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
   std::vector<std::string> HLTPaths_;
@@ -115,7 +120,7 @@ private:
   const bool debug = false;
 };
 
-void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
+void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &iSetup) const {
 
   //float the_MUON_SIGMA = 0.0000001;
   
@@ -128,19 +133,14 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
   edm::Handle<PackedCandidatesCollection> pkdPFcand_hdl;
   evt.getByToken(pkdCand_src_, pkdPFcand_hdl);
-  //const PackedCandidatesCollection& pkdPFcand = *pkdPFcand_hdl;
-
-  //edm::Handle<pat::METCollection> Met;
-  //evt.getByToken(met_, Met);
-  //const pat::MET &met = Met->front();// get PF Type-1 corrected MET directly available from miniAOD
-
-  //edm::Handle<pat::METCollection> P_Met;
-  //evt.getByToken(PuppiMet_, P_Met);
-  //const pat::MET &PuppiMet = P_Met->front();
 
   edm::Handle<reco::BeamSpot> beamSpotHandle;
   evt.getByToken(beamSpotSrc_, beamSpotHandle);
   const reco::BeamSpot& beamSpot = *beamSpotHandle;
+
+  edm::Handle<VertexCollection> primaryVtxHandle;
+  evt.getByToken(vertexSrc_, primaryVtxHandle);
+  const reco::Vertex &PV = primaryVtxHandle->front();
 
   edm::Handle<edm::TriggerResults> triggerBits;
   evt.getByToken(triggerBits_, triggerBits);
@@ -148,6 +148,8 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
   edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
   evt.getByToken(triggerObjects_, triggerObjects);
+
+  edm::ESHandle<TransientTrackBuilder> theTransientTrackBuilder = iSetup.getHandle(theTransientTrackBuilder_); 
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
@@ -171,7 +173,6 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.setP4(l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4());
         muon_triplet.setCharge(l1_ptr->charge() + l2_ptr->charge() + l3_ptr->charge());
         muon_triplet.addUserInt("charge", muon_triplet.charge());
-        //muon_triplet.addUserFloat("lep_deltaR", reco::deltaR(*l1_ptr, *l2_ptr));
     
         // Put the lepton passing the corresponding selection
         muon_triplet.addUserInt("l1_idx", l1_idx );
@@ -183,6 +184,7 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserCand("l2", l2_ptr );    
         muon_triplet.addUserCand("l3", l3_ptr );
 
+        // ** TRI MUON VERTEX ** //
         // Kinematic vertex fit
         if( !pre_vtx_selection_(muon_triplet) ) continue;
         if(debug) std::cout << "  muon_triplet charge " << muon_triplet.charge() << std::endl;
@@ -206,13 +208,49 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserInt("vtx_isValid", fitted_vtx->vertexIsValid());
 
         if( !post_vtx_selection_(muon_triplet) ) continue;
-        // * fitted candidate
+
+        // * fit candidate
         TLorentzVector fittedTau_P4;
         fittedTau_P4.SetPtEtaPhiM(fitted_cand.globalMomentum().perp(), 
 			                      fitted_cand.globalMomentum().eta(),
 			                      fitted_cand.globalMomentum().phi(),
 			                      fitted_cand.mass());
-                
+        // * refit PV [work in progress]
+        //    also from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideOfflinePrimaryVertexProduction#PrimaryVertices
+        // select good quality PF candidates for PV
+        PackedCandidatesCollection PV_PFCands;
+        //std::cout << " [refit PV] number PV " << pkdPFcand_hdl->size() << std::endl;
+        for(PackedCandidatesCollection::const_iterator pfc = pkdPFcand_hdl->begin(); pfc != pkdPFcand_hdl->end(); ++pfc){
+            if(pfc->charge() == 0 || pfc->vertexRef().isNull()) continue;
+            if(!( pfc->bestTrack() )) continue;
+            
+            // require tracks from PV 
+            //std::cout << " [refit PV] PF candidates keys " << pfc->vertexRef().key()  << std::endl;
+            if( pfc->vertexRef().key() != 0) continue; 
+            PV_PFCands.push_back(*pfc);
+        }
+        //std::cout << " [refit PV] N PF candidates "<<  PV_PFCands.size() << std::endl;
+
+        TransientTrackCollection PVtracks;
+        //std::cout << " [refit PV] N tracks for PV " << PV.tracksSize() << std::endl; 
+        //for (auto tracks_it = PV.tracks_begin(); tracks_it != PV.tracks_end(); ++tracks_it){
+            //const reco::TrackRef PVtrack_ref = tracks_it->castTo<reco::TrackRef>();
+            //reco::TransientTrack PVttrack = theTransientTrackBuilder->build(PVtrack_ref); 
+        for (PackedCandidatesCollection::const_iterator cand_it = PV_PFCands.begin(); cand_it != PV_PFCands.end(); ++cand_it){
+            reco::Track cand_track = *(cand_it->bestTrack()); 
+            //reco::TransientTrack PVttrack = theTransientTrackBuilder->build( cand_track ); 
+            //std::cout << " [refit PV] isValid track " << PVttrack.isValid() << std::endl;
+            //PVtracks.push_back(PVttrack);
+        }
+        bool PVrefit_valid = false;
+        TransientVertex PVrefit_vtx;
+        //std::cout << " [refit PV] N transient tracks for refit " << PVtracks.size() << std::endl;
+        if(PVtracks.size() > 1){
+           KalmanVertexFitter PV_fitter(true);
+           PVrefit_vtx = PV_fitter.vertex(PVtracks);
+           PVrefit_valid = PVrefit_vtx.isValid();
+        }
+
         // Lxy BS - 3mu-vtx
         // from : https://cmssdt.cern.ch/lxr/source/HLTrigger/btau/plugins/HLTDisplacedmumuFilter.cc
         GlobalPoint fittedVtxPoint(fitted_vtx->position().x(), fitted_vtx->position().y(), fitted_vtx->position().z());
@@ -248,16 +286,20 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("mu23_DCA",DCA23);
         muon_triplet.addUserFloat("mu13_DCA",DCA13);
         
+        // ** DI MUON IN TAU CAND //
         // di-muon vtx probability (used at HLT)
         // * mu_1 - mu_2
         KinVtxFitter fitter_mu12({ttracks->at(l1_idx), ttracks->at(l2_idx)}, {l1_ptr->mass(), l2_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
         muon_triplet.addUserFloat("mu12_vtxFitProb", (fitter_mu12.success() ? TMath::Prob(fitter_mu12.chi2(), fitter_mu12.dof()) : -1.)); 
+        muon_triplet.addUserFloat("mu12_fit_mass"  , (fitter_mu12.success() ? fitter_mu12.fitted_candidate().mass() : -1.)); 
         // * mu_2 - mu_3
         KinVtxFitter fitter_mu23({ttracks->at(l2_idx), ttracks->at(l3_idx)}, {l2_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
         muon_triplet.addUserFloat("mu23_vtxFitProb", (fitter_mu23.success() ? TMath::Prob(fitter_mu23.chi2(), fitter_mu23.dof()) : -1.)); 
+        muon_triplet.addUserFloat("mu23_fit_mass"  , (fitter_mu23.success() ? fitter_mu23.fitted_candidate().mass() : -1.)); 
         // * mu_1 - mu_3
         KinVtxFitter fitter_mu13({ttracks->at(l1_idx), ttracks->at(l3_idx)}, {l1_ptr->mass(), l3_ptr->mass()}, {LEP_SIGMA, LEP_SIGMA});
         muon_triplet.addUserFloat("mu13_vtxFitProb", (fitter_mu13.success() ? TMath::Prob(fitter_mu13.chi2(), fitter_mu13.dof()) : -1.)); 
+        muon_triplet.addUserFloat("mu13_fit_mass"  , (fitter_mu13.success() ? fitter_mu13.fitted_candidate().mass() : -1.)); 
 
         // VETO di-muon resonances 
         bool isToVeto = vetoResonances(evt, {l1_idx,l2_idx,l3_idx}, &muon_triplet);
@@ -265,7 +307,8 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
         // Tau candidate ISOLATION
         // custom class ... to check carefully
-        const float iso_pT_threshold = 0.0; // form Luca's code
+        //  --- set pT threshold for isolation = 0.0 GeV
+        float iso_pT_threshold = 0.0; // form Luca's code
         const float iso_dZmax = 0.2; // cm
         IsolationComputer isoComputer = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, iso_dZmax, dBetaCone_,dBetaValue_, iso_pT_threshold);
         isoComputer.addMuonsToVeto({l1_ptr, l2_ptr, l3_ptr});
@@ -273,13 +316,26 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         float ptChargedFromPU = isoComputer.pTcharged_PU(muon_triplet);
         float ptPhotons = isoComputer.pTphoton(muon_triplet);
         float ptChargedForHLT = isoComputer.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
+
+        float TauAbsIsolation = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
+         
+        //  --- set pT threshold for isolation = 0.5 GeV
+        iso_pT_threshold = 0.5;
+        IsolationComputer isoComputer_pT05 = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, iso_dZmax, dBetaCone_,dBetaValue_, iso_pT_threshold);
+        isoComputer_pT05.addMuonsToVeto({l1_ptr, l2_ptr, l3_ptr});
+        float ptChargedFromPV_pT05 = isoComputer_pT05.pTcharged_iso(muon_triplet);
+        float ptChargedFromPU_pT05 = isoComputer_pT05.pTcharged_PU(muon_triplet);
+        float ptPhotons_pT05 = isoComputer_pT05.pTphoton(muon_triplet);
+        float ptChargedForHLT_pT05 = isoComputer_pT05.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
+
+        float TauAbsIsolation_pT05 = ptChargedFromPV_pT05 + std::max(0., ptPhotons_pT05 - dBetaValue_*ptChargedFromPU_pT05);
+
         // class initiated with outer beta cone radius (NOT WORKING!!)
         //heppy::IsolationComputer isoComputer = heppy::IsolationComputer(dBetaCone_);
         //isoComputer.setPackedCandidates(pkdPFcand, -1, 0.2, 9999, true); // std::vector<pat::PackedCandidate>, fromPV_thresh, dz_thresh, dxy_thresh, also_leptons
         //float ptChargedFromPV = isoComputer.chargedAbsIso(muon_triplet, isoRadius_, 0., 0.5);
         //float ptChargedFromPU = isoComputer.puAbsIso(muon_triplet, dBetaCone_, 0., 0.5);
         //float ptPhotons       = isoComputer.photonAbsIsoRaw(muon_triplet, dBetaCone_, 0., 0.5);
-        float TauAbsIsolation = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
 
         // useful quantities for BDT
         // muons longitudinal distance
@@ -289,18 +345,18 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
 
         // HLT / offline match for the last HLT filter (building the tau candidate)
-      
-      // These vectors have one entry per HLT path
-      std::vector<int> frs(HLTPaths_.size(),0);              
-      std::vector<float> temp_DR(HLTPaths_.size(),1000.);
 
-      TVector3 tauTV3;
-      tauTV3.SetPtEtaPhi( (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Pt(),  
-			  (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Eta(),  
-			  (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Phi() );
+        // These vectors have one entry per HLT path
+        std::vector<int> frs(HLTPaths_.size(),0);              
+        std::vector<float> temp_DR(HLTPaths_.size(),1000.);
 
-      // Loop over trigger paths
-      int ipath=-1;
+        TVector3 tauTV3;
+        tauTV3.SetPtEtaPhi( (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Pt(),  
+              (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Eta(),  
+              (l1_ptr->p4() + l2_ptr->p4() + l3_ptr->p4()).Phi() );
+
+        // Loop over trigger paths
+        int ipath=-1;
       for (const std::string& path: HLTPaths_){
 	
 	if(debug) std::cout << "ipath = " << ipath << ", path = " << path << std::endl;
@@ -414,7 +470,6 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         // Tau vertex after fit
         // KINEMATIC FIT RESULTS
         // 3Mu vertex after fit
-
         muon_triplet.addUserFloat("fitted_vtxX",  fitted_vtx->position().x());
         muon_triplet.addUserFloat("fitted_vtxY",  fitted_vtx->position().y());
         muon_triplet.addUserFloat("fitted_vtxZ",  fitted_vtx->position().z());
@@ -427,20 +482,33 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("fitted_phi" , fittedTau_P4.Phi());
         muon_triplet.addUserFloat("fitted_mass", fitted_cand.mass()); 
 
-        // MET infos
-        //muon_triplet.addUserFloat("MET_pt", met.pt()); 
-        //muon_triplet.addUserFloat("mT", Tau_mT); 
-        //muon_triplet.addUserInt("MET_isPf", met.isPFMET()); 
-        //muon_triplet.addUserFloat("PuppiMET_pt", PuppiMet.pt()); 
-        //muon_triplet.addUserFloat("Puppi_mT", Tau_Puppi_mT); 
-        //muon_triplet.addUserInt("PuppiMET_isPf", PuppiMet.isPFMET()); 
+        // PV no-refit
+        muon_triplet.addUserFloat("PV_x",  PV.position().x());
+        muon_triplet.addUserFloat("PV_y",  PV.position().y());
+        muon_triplet.addUserFloat("PV_z",  PV.position().z());
+         
+        // PV refit
+        muon_triplet.addUserFloat("PVrefit_isValid", PVrefit_valid);
+        muon_triplet.addUserFloat("PVrefit_chi2", (PVrefit_valid ? PVrefit_vtx.totalChiSquared() : -99));
+        muon_triplet.addUserFloat("PVrefit_ndof", (PVrefit_valid ? PVrefit_vtx.degreesOfFreedom(): -99));
+        muon_triplet.addUserFloat("PVrefit_x",    (PVrefit_valid ? PVrefit_vtx.position().x(): -99));
+        muon_triplet.addUserFloat("PVrefit_y",    (PVrefit_valid ? PVrefit_vtx.position().y(): -99));
+        muon_triplet.addUserFloat("PVrefit_z",    (PVrefit_valid ? PVrefit_vtx.position().z(): -99));
+         
 
         // ISOLATION info
+        // pT > 0.0 GeV
         muon_triplet.addUserFloat("iso_ptChargedFromPV", ptChargedFromPV);
         muon_triplet.addUserFloat("iso_ptChargedFromPU", ptChargedFromPU);
         muon_triplet.addUserFloat("iso_ptPhotons", ptPhotons);
         muon_triplet.addUserFloat("iso_ptChargedForHLT", ptChargedForHLT);
         muon_triplet.addUserFloat("absIsolation",TauAbsIsolation);
+        // pT > 0.5 GeV
+        muon_triplet.addUserFloat("iso_ptChargedFromPV_pT05", ptChargedFromPV_pT05);
+        muon_triplet.addUserFloat("iso_ptChargedFromPU_pT05", ptChargedFromPU_pT05);
+        muon_triplet.addUserFloat("iso_ptPhotons_pT05", ptPhotons_pT05);
+        muon_triplet.addUserFloat("iso_ptChargedForHLT_pT05", ptChargedForHLT_pT05);
+        muon_triplet.addUserFloat("absIsolation_pT05",TauAbsIsolation_pT05);
 
         // useful quantities for BDT
         muon_triplet.addUserFloat("dZmu12", dz_mu12); 
@@ -472,6 +540,11 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("mu3_drForHLT",  l3_ptr->userFloat("drForHLT"));   
         muon_triplet.addUserInt("mu3_charge" ,l3_ptr->charge());
         muon_triplet.addUserInt("mu3_trackQuality",  l3_ptr->userInt("trackQuality"));
+
+        // di-muons quantities
+        muon_triplet.addUserFloat("mu1mu2_dR", reco::deltaR(*l1_ptr, *l2_ptr));
+        muon_triplet.addUserFloat("mu1mu3_dR", reco::deltaR(*l1_ptr, *l3_ptr));
+        muon_triplet.addUserFloat("mu2mu3_dR", reco::deltaR(*l2_ptr, *l3_ptr));
 
         // save further quantities, to be saved in the final ntuples: fired paths
         muon_triplet.addUserInt("mu1_fired_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1", l1_ptr->userInt("HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1"));
