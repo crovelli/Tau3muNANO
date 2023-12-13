@@ -1,5 +1,11 @@
 # Code for Tau3Mu-related analyses
 
+## lxplus version
+(Dec 2023) : in order to lounch jobs on the grid with crab pull and compile this repo in lxplus8
+```
+ssh -Y cbasile@lxplus8.cern.ch
+```
+
 ## Getting started
 
 ```shell
