@@ -7,6 +7,7 @@ from PhysicsTools.NanoAOD.vertices_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
 from PhysicsTools.NanoAOD.met_cff import *
 from PhysicsTools.Tau3muNANO.trgbits_cff import * # modified
+from PhysicsTools.Tau3muNANO.metFilters_cff import * 
 
 ## for gen and trigger muon
 from PhysicsTools.Tau3muNANO.genparticlesT3m_cff import * # define new
@@ -23,12 +24,12 @@ nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectTau3MuTables + l1bits)
 vertexTable.svSrc = cms.InputTag("slimmedSecondaryVertices")
 
 nanoSequence = cms.Sequence(nanoMetadata + #nanoSequenceCommon + 
-                            #cms.Sequence(cms.Task(linkedObjects)) +
                             cms.Sequence(vertexTask) + 
                             cms.Sequence(vertexTablesTask) +
                             cms.Sequence(metTablesTask) +           
                             cms.Sequence(globalTablesTask) + 
                             triggerObjectTau3MuTables + 
+                            metFiltersTable +
                             l1bits
 )
 
