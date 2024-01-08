@@ -41,7 +41,7 @@ options.register('skip', 0,
 
 #options.setDefault('maxEvents', -1)
 options.setDefault('maxEvents', 1000)
-tag = '2022_SV' if options.isPreECALleakage else '2022EE_SV'
+tag = '2022_SV' if options.isPreECALleakage else '2022EE_metFilter'
 options.setDefault('tag', tag)
 options.parseArguments()
 
@@ -88,8 +88,9 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load("Configuration.StandardSequences.MagneticField_cff")
+#process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.Geometry.GeometryIdeal_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('PhysicsTools.Tau3muNANO.nanoTau3Mu_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
