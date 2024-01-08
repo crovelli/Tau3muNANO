@@ -35,11 +35,26 @@ muonTripletForTau3Mu = cms.EDProducer('TriMuonBuilder',
 
 # W -> Tau + MET
 
+METfilters =[
+        'Flag_goodVertices',
+        'Flag_globalSuperTightHalo2016Filter',
+        'Flag_EcalDeadCellTriggerPrimitiveFilter',
+        'Flag_BadPFMuonFilter',
+        'Flag_BadPFMuonDzFilter',
+        'Flag_hfNoisyHitsFilter',
+        'Flag_eeBadScFilter',
+        'Flag_ecalBadCalibFilter',
+    ]
+
 METforWnuTau3Mu = cms.EDProducer('TauPlusMETBuilder',
     src = cms.InputTag('muonTripletForTau3Mu', 'SelectedTriMuons'),
+    # input MET
     met = cms.InputTag('slimmedMETs'),
     PuppiMet = cms.InputTag('slimmedMETsPuppi'),
     #DeepMet = cms.InputTag('deepMetResolutionTuneTable','DeepMETResolutionTune'),
+    # MET filters
+    filter_bits = cms.InputTag("TriggerResults","","PAT"),
+    filters     = cms.vstring(METfilters)
 )
 
 
@@ -163,6 +178,14 @@ TauPlusMetTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
     variables=cms.PSet(
         charge = uint("charge"),
         mass_nominal   = ufloat("mass_nominal"),
+        # MET filters
+        Flag_goodVertices = uint('Flag_goodVertices'),
+        Flag_globalSuperTightHalo2016Filter = uint('Flag_globalSuperTightHalo2016Filter'),
+        Flag_EcalDeadCellTriggerPrimitiveFilter = uint('Flag_EcalDeadCellTriggerPrimitiveFilter'),
+        Flag_BadPFMuonFilter   = uint('Flag_BadPFMuonFilter'),
+        Flag_BadPFMuonDzFilter = uint('Flag_BadPFMuonDzFilter'),
+        Flag_hfNoisyHitsFilter = uint('Flag_hfNoisyHitsFilter'),
+        Flag_eeBadScFilter = uint('Flag_eeBadScFilter'),
         # PF MET type1 correction
         MET_pt   = ufloat('MET_pt'),
         Tau_mT   = ufloat('Tau_mT'),

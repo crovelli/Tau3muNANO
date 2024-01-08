@@ -4,25 +4,30 @@
 //
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
+//#include "FWCore/Framework/interface/global/EDProducer.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/global/EDProducer.h"
-#include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
-#include "FWCore/Common/interface/TriggerNames.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/StreamID.h"
+
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include "DataFormats/PatCandidates/interface/TriggerPath.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerAlgorithm.h"
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 
 #include <TLorentzVector.h>
@@ -32,7 +37,7 @@
 
 using namespace std;
 
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 class METFilters : public edm::global::EDProducer <> {
   
@@ -48,9 +53,8 @@ private:
    std::string name_; 
    edm::EDGetTokenT<edm::TriggerResults> filterBits_;
   
-  
-  // for trigger match
-  std::vector<std::string> Filters_;
+   // for trigger match
+   std::vector<std::string> Filters_;
   
 };
 

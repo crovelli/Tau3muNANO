@@ -5,6 +5,9 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
@@ -30,8 +33,10 @@ public:
 explicit TauPlusMETBuilder(const edm::ParameterSet& cfg):
     src_{consumes<TauCandCollection>(cfg.getParameter<edm::InputTag>("src"))},
     met_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("met") )},
-    PuppiMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("PuppiMet") )}
+    PuppiMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("PuppiMet") )},
     //DeepMet_{consumes<pat::METCollection>( cfg.getParameter<edm::InputTag>("DeepMet") )}
+    filterBits_{consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("filter_bits"))},
+    Filters_{cfg.getParameter<std::vector<std::string>>("filters")}
     {
         produces<pat::CompositeCandidateCollection>("builtWbosons");
     }   
@@ -46,10 +51,11 @@ private:
     const edm::EDGetTokenT<TauCandCollection>  src_;
     const edm::EDGetTokenT<pat::METCollection> met_;
     const edm::EDGetTokenT<pat::METCollection> PuppiMet_;
+    const edm::EDGetTokenT<edm::TriggerResults> filterBits_;
     //const edm::EDGetTokenT<pat::METCollection> DeepMet_;
-
+  
+    std::vector<std::string> Filters_;
     bool debug = false;
-
     std::pair<double, double> longMETsolutions( TLorentzVector&,  TLorentzVector &) const;
 
 };
@@ -74,6 +80,11 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
     //edm::Handle<pat::METCollection> D_Met;
     //evt.getByToken(DeepMet_, D_Met);
     //const pat::MET &DeepMet = D_Met->front();
+    
+    edm::Handle<edm::TriggerResults> filterBits;
+    evt.getByToken(filterBits_, filterBits);
+    const edm::TriggerNames &filterNames = evt.triggerNames(*filterBits); 
+
 
     // [OUTPUT]
     std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
@@ -130,7 +141,30 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
 
         pat::CompositeCandidate TauPlusMET;
         TauPlusMET.setCharge(tau.charge());
-        
+       
+        // MET filters 
+        for (const std::string& filter: Filters_){
+
+           if(debug) std::cout << " ... checking filter " << filter << std::endl;
+           bool filterFound = false;
+           unsigned int index = filterNames.triggerIndex(filter);
+           if(index == filterBits->size()){
+              std::cout << " WARNING filter " << filter << " NOT found in TriggerResults" << std::endl;
+           }else{ 
+              if (filterNames.triggerName(index) == filter) filterFound = true;
+              if(debug) std::cout << " this is filter "<< filterNames.triggerName(index) << " i need " << filter << std::endl; 
+              if(debug) std::cout << " extracted value is " << filterBits->accept(index) << std::endl;
+           }
+           //int filter_val = (filterFound ? filterBits->accept(index) : false); 
+           int filter_val = -1;
+           if(filterFound){
+              filter_val = (filterBits->accept(index) ? 1 : 0);
+           }
+           //tab->addColumnValue<int>(filter, filter_val, filter);
+           if(debug) std::cout << " save value " << filter_val << std::endl;
+           TauPlusMET.addUserInt(filterNames.triggerName(index), filter_val);
+
+        }// loop on MET-filters 
 
 
         // save variables
