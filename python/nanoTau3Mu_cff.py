@@ -28,8 +28,7 @@ nanoSequence = cms.Sequence(nanoMetadata + #nanoSequenceCommon +
                             cms.Sequence(vertexTablesTask) +
                             cms.Sequence(metTablesTask) +           
                             cms.Sequence(globalTablesTask) + 
-                            triggerObjectTau3MuTables + 
-                            metFiltersTable +
+                            triggerObjectTau3MuTables +  
                             l1bits
 )
 
@@ -45,7 +44,7 @@ def nanoAOD_customizeMuonTriggerTau3Mu(process):
 #    return process   
 
 def nanoAOD_customizeTriggerBitsTau3Mu(process):
-    process.nanoSequence = cms.Sequence( process.nanoSequence + trgTables)
+    process.nanoSequence = cms.Sequence( process.nanoSequence + metFiltersTable + trgTables)
     return process
 
 def nanoAOD_customizeWnuTau3Mu(process):
