@@ -2,9 +2,10 @@
 //class to aplly MET filters
 // follow the Run3 recommendation here (https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Run_3_recommendations)
 //
+#include <memory>
+#include <string>
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-//#include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Framework/interface/global/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -30,10 +31,7 @@
 
 #include "DataFormats/NanoAOD/interface/FlatTable.h"
 
-#include <TLorentzVector.h>
 #include "helper.h"
-#include "TVectorD.h"    // for fixing tracks
-#include "TMatrixDSym.h" // for fixing tracks
 
 using namespace std;
 
@@ -47,14 +45,15 @@ public:
     
   ~METFilters() override {};
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
+   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
  
    std::string name_; 
-   edm::EDGetTokenT<edm::TriggerResults> filterBits_;
+   const edm::EDGetTokenT<edm::TriggerResults> filterBits_;
   
    // for trigger match
-   std::vector<std::string> Filters_;
+   const std::vector<std::string> Filters_;
   
 };
 
