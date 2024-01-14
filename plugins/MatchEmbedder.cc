@@ -68,6 +68,8 @@ void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSe
   }
   
   //adding label to be consistent with the muon and track naming
+  
+  //std::cout << "[+] Match Embedder number of elements " << (*out).size() << std::endl;
   evt.put(std::move(out));
 }
 

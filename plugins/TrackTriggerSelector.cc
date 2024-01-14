@@ -193,63 +193,62 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
       // Loop over trigger objects matching the reference path
       for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
       
-	if(debug) std::cout << "New object" << std::endl;
+         if(debug) std::cout << "New object" << std::endl;
 
-	// consider only objects which match the ref path    
-	obj.unpackPathNames(trigNames);
-	obj.unpackFilterLabels(iEvent, *triggerBits);
-	std::vector<std::string> pathNamesAll  = obj.pathNames(false);
-	bool isPathExist = false;
-	for (unsigned h = 0, n = pathNamesAll.size(); h < n; ++h) {
-
-	  // remove the path version
-	  string pathNameStart;
-	  pathNameStart = pathNamesAll[h].substr(0,pathNamesAll[h].find("_v")-0);
-	  if(debug) std::cout << "In loop over trigger object: this is ipath = " << pathNamesAll[h] << ", I need path = " << path << std::endl;	  
-	  if(pathNameStart==path) isPathExist = true;     
-	}
-	if(!isPathExist) continue;
+         // consider only objects which match the ref path    
+         obj.unpackPathNames(trigNames);
+         obj.unpackFilterLabels(iEvent, *triggerBits);
+         std::vector<std::string> pathNamesAll  = obj.pathNames(false);
+         bool isPathExist = false;
+         for (unsigned int h = 0, n = pathNamesAll.size(); h < n; ++h) {
+            // remove the path version
+            string pathNameStart;
+            pathNameStart = pathNamesAll[h].substr(0,pathNamesAll[h].find("_v")-0);
+            if(debug) std::cout << "In loop over trigger object: this is ipath = " << pathNamesAll[h] << ", I need path = " << path << std::endl;	  
+            if(pathNameStart==path) isPathExist = true;     
+         }
+         if(!isPathExist) continue;
       
-	if(debug) std::cout << "Path found" << std::endl;	  
+         if(debug) std::cout << "Path found -> " << path << std::endl;	  
 
-	// muObjNumberTM: hlt candidate firing the request for tracker muons
-	int muObjNumberTM = -1;
-	for (unsigned hh = 0; hh < obj.filterLabels().size(); ++hh){	
+         // muObjNumberTM: hlt candidate firing the request for tracker muons
+         int muObjNumberTM = -1;
+         for (unsigned hh = 0; hh < obj.filterLabels().size(); ++hh){	
 
-	  if(debug) std::cout << "Event: Filter " << hh << " => " << obj.filterLabels()[hh] << ": pt =  " << obj.pt() << ", eta = " << obj.eta() << ", phi = " << obj.phi() << std::endl;
-	  if(debug) std::cout << "" << std::endl;	  
+            if(debug) std::cout << "Event: Filter " << hh << " => " << obj.filterLabels()[hh] << ": pt =  " << obj.pt() << ", eta = " << obj.eta() << ", phi = " << obj.phi() << std::endl;
+            if(debug) std::cout << "" << std::endl;	  
 	  
-	  if (path=="HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1" || path=="HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15") {
-	    if(obj.filterLabels()[hh].find("hltTau3MuTriMuon1filter") != std::string::npos) {  
-	      muObjNumberTM = hh;
-	    }
-	  }
-	}
-	if(debug && muObjNumberTM>=0) std::cout << "Loop over filters done, my TM filter found" << std::endl;
+            if (path=="HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1" || path=="HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15") {
+               if(obj.filterLabels()[hh].find("hltTau3MuTriMuon1filter") != std::string::npos) {  
+                  muObjNumberTM = hh;
+               }
+            }
+         }
+         if(debug && muObjNumberTM>=0) std::cout << "Loop over filters done, my TM filter found" << std::endl;
       
-	// here HLT obj vs reco track candidates
-	TVector3 trkTV3, objTV3;
-	trkTV3.SetPtEtaPhi( trk.pt(), trk.eta(), trk.phi() );
-	objTV3.SetPtEtaPhi( obj.pt(), obj.eta(), obj.phi() );
-	Float_t deltaR = fabs(trkTV3.DeltaR(objTV3));
+         // here HLT obj vs reco track candidates
+         TVector3 trkTV3, objTV3;
+         trkTV3.SetPtEtaPhi( trk.pt(), trk.eta(), trk.phi() );
+         objTV3.SetPtEtaPhi( obj.pt(), obj.eta(), obj.phi() );
+         Float_t deltaR = fabs(trkTV3.DeltaR(objTV3));
     
-	// here HLT-trk candidates
-	if (muObjNumberTM>=0) {  
-	  if(debug) std::cout<< "DeltaR = " << deltaR << std::endl;
-	  if(debug) std::cout << "This is a tracker muon HLT candidate" << endl;
-	  if(deltaR < drForTriggerMatch_){    
-	    frs[ipath]=1;    
-	    if (deltaR < minDr){
-	      minDr = deltaR;
-	      minPt = obj.pt(); 
-	    }
-	    if(debug) std::cout << "This object is matched with track: minDr = " << minDr << std::endl;
-	    if(debug) std::cout << "Offline: " << trk.pt() << " " << trk.eta() << " " << trk.phi() << std::endl;
-	    if(debug) std::cout << "HLT: " << obj.pt() << " " << obj.eta() << " " << obj.phi() << std::endl;
-	    if(debug) std::cout << muObjNumberTM << std::endl;
-	  }
-	}
-	
+         // here HLT-trk candidates
+         if (muObjNumberTM>=0) {  
+            if(debug) std::cout << "DeltaR = " << deltaR << std::endl;
+            if(debug) std::cout << "This is a tracker muon HLT candidate" << endl;
+            if(deltaR < drForTriggerMatch_){    
+               frs[ipath]=1;    
+               if (deltaR < minDr){
+                  minDr = deltaR;
+                  minPt = obj.pt(); 
+               }
+               if(debug) std::cout << "This object is matched with track: minDr = " << minDr << std::endl;
+               if(debug) std::cout << "Offline: " << trk.pt() << " " << trk.eta() << " " << trk.phi() << std::endl;
+               if(debug) std::cout << "HLT: " << obj.pt() << " " << obj.eta() << " " << obj.phi() << std::endl;
+               if(debug) std::cout << muObjNumberTM << std::endl;
+            }
+         }
+
       } // Loop over trigger object
       
       // Here we store the minimum between reco track and all its matched HLT objects for this HLT path
@@ -270,104 +269,105 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
       int size2 = temp_matched_to.size();
       int size3 = temp_DR.size();
       if (size1!=size2 || size1!=size3) 
-	std::cout << "problem with size: " << size1 << " " << size2 << " " << size3 << std::endl;
+         std::cout << "problem with size: " << size1 << " " << size2 << " " << size3 << std::endl;
       else {
-	std::cout << "size ok: " << size1 << std::endl;	
-	for (int jj=0; jj<size1; jj++) std::cout << "fired = " << frs[jj] 
-						 << ", pT HLT obj = " << temp_matched_to[jj] 
-						 << ", pT RECO obj = " << trk.pt()
-						 << ", dR = " << temp_DR[jj] << std::endl;
+         std::cout << "size ok: " << size1 << std::endl;	
+         for (int jj=0; jj<size1; jj++) std::cout << "fired = " << frs[jj] 
+            << ", pT HLT obj = " << temp_matched_to[jj] 
+               << ", pT RECO obj = " << trk.pt()
+               << ", dR = " << temp_DR[jj] << std::endl;
       }
     } // debug
-    
+
   } // Loop over reco tracks
 
   if(debug) std::cout << std::endl;
 
   // Now check for different reco tracks that are matched to the same HLTObject.
   for(unsigned int path=0; path<HLTPaths_.size(); path++){
-    for( unsigned int iTrk=0; iTrk<numPresTracks; iTrk++ ) {
-      for(unsigned int it=(iTrk+1); it<numPresTracks; it++){
-	if(matcher[iTrk][path]!=1000. && matcher[iTrk][path]==matcher[it][path]){ 
-	  if(DR[iTrk][path]<DR[it][path]){ 
-	    fires[it][path]=0;
-	    matcher[it][path]=1000.;
-	    DR[it][path]=1000.;                       
-	  }
-	  else{
-	    fires[iTrk][path]=0;
-	    matcher[iTrk][path]=1000.;
-	    DR[iTrk][path]=1000.;                       
-	  }
-	}              
-      }
-    }
-  }
+     for( unsigned int iTrk=0; iTrk<numPresTracks; iTrk++ ) {
+        for(unsigned int it=(iTrk+1); it<numPresTracks; it++){
+           if(matcher[iTrk][path]!=1000. && matcher[iTrk][path]==matcher[it][path]){ 
+              if(DR[iTrk][path]<DR[it][path]){ 
+                 fires[it][path]=0;
+                 matcher[it][path]=1000.;
+                 DR[it][path]=1000.;                       
+              }
+              else{
+                 fires[iTrk][path]=0;
+                 matcher[iTrk][path]=1000.;
+                 DR[iTrk][path]=1000.;                       
+              }
+           }              
+        }// loop on trk2
+     }// loop on trk1
+  }// loop on paths
 
   
   // Loop over tracks and save all tracks passing the selection
   for( unsigned int iTrk=0; iTrk<numPresTracks; ++iTrk ) {
 
-    pat::PackedCandidate trk = preselTracks[iTrk];
+     pat::PackedCandidate trk = preselTracks[iTrk];
 
-    //const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
-    const reco::TransientTrack trackTT( fix_track( &(*trk.bestTrack()), 1e-8 ), &bField ); 
-    if(!trackTT.isValid()) continue; 
+     //const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
+     const reco::TransientTrack trackTT( fix_track( &(*trk.bestTrack()), 1e-8 ), &bField ); 
+     if(!trackTT.isValid()) continue; 
 
-    // clean tracks wrt muons passing mediumID 
-    int matchedToMediumMuon = 0;
-    for (const pat::Muon &imutmp : *muons) {
-      for (unsigned int i = 0; i < imutmp.numberOfSourceCandidatePtrs(); ++i) {
-	if (! ((imutmp.sourceCandidatePtr(i)).isNonnull() && 
-	       (imutmp.sourceCandidatePtr(i)).isAvailable())
-	    )   continue;
-	
-	const edm::Ptr<reco::Candidate> & source = imutmp.sourceCandidatePtr(i);
-	if (source.id() == tracks.id() && source.key() == iTrk){
-	  if (imutmp.isMediumMuon())  matchedToMediumMuon  = 1;
-	  break;
-	}
-      }
-    }
-    if (matchedToMediumMuon) continue;
+     // clean tracks wrt muons passing mediumID 
+     int matchedToMediumMuon = 0;
+     for (const pat::Muon &imutmp : *muons) {
+        for (unsigned int i = 0; i < imutmp.numberOfSourceCandidatePtrs(); ++i) {
+           if (! ((imutmp.sourceCandidatePtr(i)).isNonnull() && 
+                    (imutmp.sourceCandidatePtr(i)).isAvailable()))   continue;
 
-    // track candidate 
-    pat::CompositeCandidate pcand;
-    pcand.setP4(trk.p4());
-    pcand.setVertex(trk.vertex());
-    pcand.setPdgId(trk.pdgId());
-    pcand.addUserInt("charge", trk.charge());
-    pcand.addUserInt("nValidHits", trk.bestTrack()->found());
-    pcand.addUserFloat("dZpv", trk.dz(PV.position()));
-    pcand.addUserFloat("err_dZpv", trk.dzError());    
+           const edm::Ptr<reco::Candidate> & source = imutmp.sourceCandidatePtr(i);
+           if (source.id() == tracks.id() && source.key() == iTrk){
+              if (imutmp.isMediumMuon())  matchedToMediumMuon  = 1;
+              break;
+           }
+        } // on muon sources 
+     }// on muons
+     if (matchedToMediumMuon) continue;
+     if(debug) std::cout << " track " << iTrk << " not TM, good to save pT " << trk.pt() << std::endl;
+     // track candidate 
+     pat::CompositeCandidate pcand;
+     pcand.setP4(trk.p4());
+     pcand.setVertex(trk.vertex());
+     pcand.setPdgId(trk.pdgId());
+     pcand.addUserInt("charge", trk.charge());
+     pcand.addUserInt("nValidHits", trk.bestTrack()->found());
+     pcand.addUserFloat("dZpv", trk.dz(PV.position()));
+     pcand.addUserFloat("err_dZpv", trk.dzError());    
 
-    // compatibility with BS, applied at HLT level
-    float trkdr = fabs( (- (trk.vx()-beamSpot.x0()) * trk.py() + (trk.vy()-beamSpot.y0()) * trk.px() ) / trk.pt() );
-    pcand.addUserFloat("drForHLT", trkdr);
+     // compatibility with BS, applied at HLT level
+     float trkdr = fabs( (- (trk.vx()-beamSpot.x0()) * trk.py() + (trk.vy()-beamSpot.y0()) * trk.px() ) / trk.pt() );
+     pcand.addUserFloat("drForHLT", trkdr);
 
-    // trigger match
-    for(unsigned int i=0; i<HLTPaths_.size(); i++){
-      pcand.addUserInt(HLTPaths_[i],fires[iTrk][i]);
-      std::string namedr = HLTPaths_[i]+"_dr";
-      pcand.addUserFloat(namedr,DR[iTrk][i]);  
-    }
+     // trigger match
+     for(unsigned int i=0; i<HLTPaths_.size(); i++){
+        pcand.addUserInt(HLTPaths_[i],fires[iTrk][i]);
+        std::string namedr = HLTPaths_[i]+"_dr";
+        pcand.addUserFloat(namedr,DR[iTrk][i]);  
+     }
 
     // in order to avoid revoking the expensive ttrack builder many times and still have everything sorted, we add them to vector of pairs
     vectrk_ttrk.emplace_back( std::make_pair(pcand,trackTT ) );   
-  }
+  }// loop on presel tracks
   
   // sort to be uniform with leptons
   std::sort( vectrk_ttrk.begin(), vectrk_ttrk.end(), 
-             [] ( auto & trk1, auto & trk2) -> 
-	     bool {return (trk1.first).pt() > (trk2.first).pt();} 
-	     );
-  
+        [] ( auto & trk1, auto & trk2) -> 
+        bool {return (trk1.first).pt() > (trk2.first).pt();} 
+        );
+
   // finaly save ttrks and trks to the correct _out vectors
   for ( auto & trk: vectrk_ttrk){
-    tracks_out -> emplace_back( trk.first);
-    trans_tracks_out -> emplace_back(trk.second);
+     if (debug) std::cout << "[=] save track with pT " << trk.first.pt() << std::endl;
+     tracks_out -> emplace_back( trk.first);
+     trans_tracks_out -> emplace_back(trk.second);
   }
-  
+  if(debug) std::cout << "[==] Number of saved tracks " << (*tracks_out).size() << std::endl;
+  if(debug) std::cout << "[==] Number of saved transient tracks " << (*trans_tracks_out).size() << std::endl;
   iEvent.put(std::move(tracks_out),       "SelectedTracks");
   iEvent.put(std::move(trans_tracks_out), "SelectedTransientTracks");
 }
