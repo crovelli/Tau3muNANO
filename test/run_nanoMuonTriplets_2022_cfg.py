@@ -41,7 +41,7 @@ options.register('skip', 0,
 
 #options.setDefault('maxEvents', -1)
 options.setDefault('maxEvents', 1000)
-tag = '2022_SV' if options.isPreECALleakage else '2022EE_metFilter'
+tag = '2022_SV' if options.isPreECALleakage else '2022EE_TrackIN'
 options.setDefault('tag', tag)
 options.parseArguments()
 
@@ -145,8 +145,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.Tau3muNANO.nanoTau3Mu_cff import *
+process = nanoAOD_customizeTrackTau3Mu(process)
 process = nanoAOD_customizeMuonTriggerTau3Mu(process)
-#process = nanoAOD_customizeTrackTau3Mu(process)
 process = nanoAOD_customizeWnuTau3Mu(process)
 process = nanoAOD_customizeTriggerBitsTau3Mu(process)
 
