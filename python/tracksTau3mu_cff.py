@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from PhysicsTools.NanoAOD.simpleCandidateFlatTableProducer_cfi import simpleCandidateFlatTableProducer
 from PhysicsTools.Tau3muNANO.common_cff import *
 
 Path2022=["HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1","HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15"]
@@ -22,7 +23,8 @@ trackTrgSelector = cms.EDProducer("TrackTriggerSelector",
                                   trkNormChiMax = cms.int32(-1)
                               )
 
-trackT3mTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+#trackT3mTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+trackT3mTable = simpleCandidateFlatTableProducer.clone( 
                                src = cms.InputTag("trackTrgSelector:SelectedTracks"),
                                cut = cms.string(""), 
                                name = cms.string("ProbeTracks"),
@@ -30,11 +32,11 @@ trackT3mTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
                                singleton = cms.bool(False),         
                                extension = cms.bool(False),         
                                variables = cms.PSet(PTVars, 
-                               nValidHits = Var("userInt('nValidHits')",float,doc="N. valid hits"), 
-                               dZpv = Var("userFloat('dZpv')",float,doc="long distance from PV"),
-                               err_dZpv = Var("userFloat('err_dZpv')",float,doc="long error from PV"),
-                               drForHLT = Var("userFloat('drForHLT')",float,doc="BS compatibility"),
-                                                )
+                                                    nValidHits = Var("userInt('nValidHits')",float,doc="N. valid hits"), 
+                                                    dZpv = Var("userFloat('dZpv')",float,doc="long distance from PV"),
+                                                    err_dZpv = Var("userFloat('err_dZpv')",float,doc="long error from PV"),
+                                                    drForHLT = Var("userFloat('drForHLT')",float,doc="BS compatibility"),
+                                                ),
 )
 
 trackT3mMCMatchForTable = cms.EDProducer("MCMatcher",   
@@ -51,8 +53,8 @@ trackT3mMCMatchForTable = cms.EDProducer("MCMatcher",
 
 trackT3mMCMatchEmbedded = cms.EDProducer(
     'CompositeCandidateMatchEmbedder',
-    src = trackT3mTable.src,
-    matching = cms.InputTag("tracksT3mMCMatchForTable")
+    src = cms.InputTag("trackTrgSelector:SelectedTracks"),
+    matching = cms.InputTag("trackT3mMCMatchForTable")
 )
 
 trackT3mMCTable = cms.EDProducer("CandMCMatchTableProducerT3m",
