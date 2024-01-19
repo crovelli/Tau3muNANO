@@ -1,0 +1,78 @@
+common:
+  data:
+    lumimask : https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions23/Cert_Collisions2023_366442_370790_Golden.json
+    splitting: 20
+    globaltag: 130X_dataRun3_PromptAnalysis_v1
+  mc:
+    splitting: 1
+    globaltag: 130X_mcRun3_2023_realistic_v14
+
+samples:
+  #
+  #  DATA
+  #  
+  #
+  data_Run2023B_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2023B-22Sep2023-v2/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023B_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  #
+  data_Run2023C_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2023C-22Sep2023_v4-v2/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023C_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False  

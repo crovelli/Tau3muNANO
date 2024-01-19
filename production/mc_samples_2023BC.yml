@@ -1,0 +1,12 @@
+common:
+  mc:
+    splitting: 1
+    globaltag: 130X_mcRun3_2023_realistic_v14
+
+samples:
+  #
+  #  MC
+  #  
+  WnuTau3Mu:
+    dataset: /WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM
+    isMC: True  
