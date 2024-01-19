@@ -11,7 +11,7 @@ config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'DsPhiMuMuPi_Tau3MuNano2022_%s' % production_tag
+config.General.workArea = 'DsPhiMuMuPiNano_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
@@ -74,7 +74,6 @@ if __name__ == '__main__':
         print('submitting', name)
 
         isMC = info['isMC']
-        isEE = info['isEE']
 
         config.Data.inputDataset = info['dataset'] % part \
                                    if part is not None else \
@@ -95,16 +94,10 @@ if __name__ == '__main__':
             'splitting',
             common[common_branch].get('splitting', None)
         )
-        if not isEE :
-            globaltag = info.get(
+        globaltag = info.get(
                 'globaltag',
                 common[common_branch].get('globaltag', None)
-            )
-        else :
-            globaltag = info.get(
-                'globaltag',
-                common[common_branch].get('globaltagEE', None)
-            )
+                )
             
         
         config.JobType.pyCfgParams = [
