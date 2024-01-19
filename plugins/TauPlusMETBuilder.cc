@@ -122,22 +122,25 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
         // W P4 with 2 sol. for missing Pz 
         TLorentzVector WcandP4_min, WcandP4_max, WcandPuppiP4_min, WcandPuppiP4_max, WcandDeepP4_min, WcandDeepP4_max;
         TLorentzVector MetP4_min, MetP4_max, PuppiMetP4_min, PuppiMetP4_max, DeepMetP4_min, DeepMetP4_max;  
-
-        //WcandP4.SetPtEtaPhiM((MetP4 + tauCandP4).Perp(), 0.0, (MetP4 + tauCandP4).Phi(), W_MASS);
-        MetP4_min = MetP4; MetP4_max = MetP4;
-        MetP4_min.SetPz(MET_missPz.first); MetP4_max.SetPz(MET_missPz.second); 
+        // PF-type1
+        MetP4_min.SetPxPyPzE(MetP4.Px(), MetP4.Py(), MET_missPz.first,  std::sqrt(MetP4.Px()*MetP4.Px()+MetP4.Py()*MetP4.Py()+MET_missPz.first*MET_missPz.first) );
+        MetP4_max.SetPxPyPzE(MetP4.Px(), MetP4.Py(), MET_missPz.second, std::sqrt(MetP4.Px()*MetP4.Px()+MetP4.Py()*MetP4.Py()+MET_missPz.second*MET_missPz.second) );
         WcandP4_min = MetP4_min + tauCandP4;
         WcandP4_max = MetP4_max + tauCandP4;
-        //WcandPuppiP4.SetPtEtaPhiM((PuppiMetP4 + tauCandP4).Perp(), 0.0, (PuppiMetP4 + tauCandP4).Phi(), W_MASS);
-        PuppiMetP4_min = PuppiMetP4; PuppiMetP4_max = PuppiMetP4;
-        PuppiMetP4_min.SetPz(PuppiMET_missPz.first); PuppiMetP4_max.SetPz(PuppiMET_missPz.second); 
+        // Puppi MET
+        PuppiMetP4_min.SetPxPyPzE(PuppiMetP4.Px(), PuppiMetP4.Py(), PuppiMET_missPz.first, std::sqrt(PuppiMetP4.Px()*PuppiMetP4.Px()+PuppiMetP4.Py()*PuppiMetP4.Py()+PuppiMET_missPz.first*PuppiMET_missPz.first) );
+        PuppiMetP4_max.SetPxPyPzE(PuppiMetP4.Px(), PuppiMetP4.Py(), PuppiMET_missPz.second, std::sqrt(PuppiMetP4.Px()*PuppiMetP4.Px()+PuppiMetP4.Py()*PuppiMetP4.Py()+PuppiMET_missPz.second*PuppiMET_missPz.second) );
         WcandPuppiP4_min = PuppiMetP4_min + tauCandP4;
         WcandPuppiP4_max = PuppiMetP4_max + tauCandP4;
-        //WcandDeepP4.SetPtEtaPhiM((DeepMetP4 + tauCandP4).Perp(), 0.0, (DeepMetP4 + tauCandP4).Phi(), W_MASS);
-        DeepMetP4_min = DeepMetP4; DeepMetP4_max = DeepMetP4;
-        DeepMetP4_min.SetPz(DeepMET_missPz.first); DeepMetP4_max.SetPz(DeepMET_missPz.second);
+        if (debug) std::cout << Form(" [PuppiMET] W-min pT %.3f \t eta %.3f \t phi %.3f E %.3f", WcandPuppiP4_min.Pt(), WcandPuppiP4_min.Eta(), WcandPuppiP4_min.Phi(), WcandPuppiP4_min.E() ) << std::endl;
+        if (debug) std::cout << Form(" [PuppiMET] W-max pT %.3f \t eta %.3f \t phi %.3f E %.3f", WcandPuppiP4_max.Pt(), WcandPuppiP4_max.Eta(), WcandPuppiP4_max.Phi(), WcandPuppiP4_max.E() ) << std::endl;
+        // Deep MET
+        DeepMetP4_min.SetPxPyPzE(DeepMetP4.Px(), DeepMetP4.Py(), DeepMET_missPz.first, std::sqrt(DeepMetP4.Px()*DeepMetP4.Px()+DeepMetP4.Py()*DeepMetP4.Py()+DeepMET_missPz.first*DeepMET_missPz.first) );
+        DeepMetP4_max.SetPxPyPzE(DeepMetP4.Px(), DeepMetP4.Py(), DeepMET_missPz.second, std::sqrt(DeepMetP4.Px()*DeepMetP4.Px()+DeepMetP4.Py()*DeepMetP4.Py()+DeepMET_missPz.second*DeepMET_missPz.second) );
         WcandDeepP4_min = DeepMetP4_min + tauCandP4;
         WcandDeepP4_max = DeepMetP4_max + tauCandP4;
+        if (debug) std::cout << Form(" [DeepMET] W-min pT %.3f \t eta %.3f \t phi %.3f E %.3f", WcandDeepP4_min.Pt(), WcandDeepP4_min.Eta(), WcandDeepP4_min.Phi(), WcandDeepP4_min.E() ) << std::endl;
+        if (debug) std::cout << Form(" [DeepMET] W-max pT %.3f \t eta %.3f \t phi %.3f E %.3f", WcandDeepP4_max.Pt(), WcandDeepP4_max.Eta(), WcandDeepP4_max.Phi(), WcandDeepP4_max.E() ) << std::endl;
 
         pat::CompositeCandidate TauPlusMET;
         TauPlusMET.setCharge(tau.charge());
@@ -186,21 +189,22 @@ void TauPlusMETBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup 
         TauPlusMET.addUserFloat("DeepMETmaxPz", DeepMET_missPz.second);
         // Tau + MET ~ W candidate
         TauPlusMET.addUserFloat("pt", (WcandP4_min.Pt() == WcandP4_max.Pt() ? WcandP4_min.Pt() : -1.0 ));
-        TauPlusMET.addUserFloat("Puppi_pt", (WcandPuppiP4_min.Pt() == WcandPuppiP4_max.Pt() ? WcandPuppiP4_min.Pt() : -1.0 ));
-        TauPlusMET.addUserFloat("Deep_pt", (WcandDeepP4_min.Pt() == WcandDeepP4_max.Pt()? WcandDeepP4_min.Pt() : -1.0 ));
         TauPlusMET.addUserFloat("eta_min", WcandP4_min.Eta());
         TauPlusMET.addUserFloat("eta_max", WcandP4_max.Eta());
-        TauPlusMET.addUserFloat("Puppi_eta_min", WcandPuppiP4_min.Eta());
-        TauPlusMET.addUserFloat("Puppi_eta_max", WcandPuppiP4_max.Eta());
-        TauPlusMET.addUserFloat("Deep_eta_min", WcandDeepP4_min.Eta());
-        TauPlusMET.addUserFloat("Deep_eta_max", WcandDeepP4_max.Eta());
         TauPlusMET.addUserFloat("phi", WcandP4_min.Phi());
-        TauPlusMET.addUserFloat("Puppi_phi", WcandPuppiP4_min.Phi());
-        TauPlusMET.addUserFloat("Deep_phi", WcandDeepP4_min.Phi());
         TauPlusMET.addUserFloat("mass_min", WcandP4_min.M());
         TauPlusMET.addUserFloat("mass_max", WcandP4_max.M());
+        // Puppi correction
+        TauPlusMET.addUserFloat("Puppi_pt", (WcandPuppiP4_min.Pt() == WcandPuppiP4_max.Pt() ? WcandPuppiP4_min.Pt() : -1.0 ));
+        TauPlusMET.addUserFloat("Puppi_eta_min", WcandPuppiP4_min.Eta());
+        TauPlusMET.addUserFloat("Puppi_eta_max", WcandPuppiP4_max.Eta());
+        TauPlusMET.addUserFloat("Puppi_phi", WcandPuppiP4_min.Phi());
         TauPlusMET.addUserFloat("Puppi_mass_min", WcandPuppiP4_min.M());
         TauPlusMET.addUserFloat("Puppi_mass_max", WcandPuppiP4_max.M());
+        TauPlusMET.addUserFloat("Deep_pt", (WcandDeepP4_min.Pt() == WcandDeepP4_max.Pt()? WcandDeepP4_min.Pt() : -1.0 ));
+        TauPlusMET.addUserFloat("Deep_eta_min", WcandDeepP4_min.Eta());
+        TauPlusMET.addUserFloat("Deep_eta_max", WcandDeepP4_max.Eta());
+        TauPlusMET.addUserFloat("Deep_phi", WcandDeepP4_min.Phi());
         TauPlusMET.addUserFloat("Deep_mass_min", WcandDeepP4_min.M());
         TauPlusMET.addUserFloat("Deep_mass_max", WcandDeepP4_max.M());
         TauPlusMET.addUserFloat("mass_nominal", W_MASS);
