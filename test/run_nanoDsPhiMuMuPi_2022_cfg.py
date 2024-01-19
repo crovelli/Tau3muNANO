@@ -52,7 +52,7 @@ options.parseArguments()
 # 2022 ABCDE ReReco    : 130X_dataRun3_v2                        # for the time being, not available in 130X for parking
 # 2022 FG Prompt       : 130X_dataRun3_PromptAnalysis_v1
 if not options.isMC :
-    globaltag = '130X_dataRun3_PromptAnalysis_v1'
+    globaltag = '130X_dataRun3_v2' if options.isPreECALleakge else '130X_dataRun3_PromptAnalysis_v1'
  
 else :
     globaltag = '130X_mcRun3_2022_realistic_v5' if options.isPreECALleakage else '130X_mcRun3_2022_realistic_postEE_v6'

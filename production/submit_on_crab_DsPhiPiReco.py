@@ -11,7 +11,7 @@ config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'Tau3MuNano2022_%s' % production_tag
+config.General.workArea = 'DsPhiMuMuPi_Tau3MuNano2022_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
@@ -23,7 +23,7 @@ config.Data.inputDBS = 'global'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '../test/run_nanoMuonTriplets_2022_cfg.py'
+config.JobType.psetName = '../test/run_nanoDsPhiMuMuPi_2022_cfg.py'
 config.JobType.allowUndistributedCMSSW = True
 
 config.section_('User')
@@ -38,7 +38,6 @@ if __name__ == '__main__':
 
   from CRABAPI.RawCommand import crabCommand
   from CRABClient.ClientExceptions import ClientException
-  #from httplib import HTTPException
   from http.client import HTTPException
   from multiprocessing import Process
 
@@ -52,8 +51,9 @@ if __name__ == '__main__':
 
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'MCsamples_2022.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'DsMCsamples_2022.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
+  parser.add_argument('-d', '--dry_run', action='store_true', help = 'just create the job but does not submit it')
   args = parser.parse_args()
 
   with open(args.yaml) as f:
@@ -74,6 +74,7 @@ if __name__ == '__main__':
         print('submitting', name)
 
         isMC = info['isMC']
+        isEE = info['isEE']
 
         config.Data.inputDataset = info['dataset'] % part \
                                    if part is not None else \
@@ -94,10 +95,17 @@ if __name__ == '__main__':
             'splitting',
             common[common_branch].get('splitting', None)
         )
-        globaltag = info.get(
-            'globaltag',
-            common[common_branch].get('globaltag', None)
-        )
+        if not isEE :
+            globaltag = info.get(
+                'globaltag',
+                common[common_branch].get('globaltag', None)
+            )
+        else :
+            globaltag = info.get(
+                'globaltag',
+                common[common_branch].get('globaltagEE', None)
+            )
+            
         
         config.JobType.pyCfgParams = [
             'isMC=%s' % isMC, 'reportEvery=1000',
@@ -105,9 +113,12 @@ if __name__ == '__main__':
             'globalTag=%s' % globaltag,
         ]
         
-        config.JobType.outputFiles = ['_'.join(['tau3muNANO', 'mc' if isMC else 'data', production_tag])+'.root']
+        config.JobType.outputFiles = ['_'.join(['DsPhiMuMuPiNANO', 'mc' if isMC else 'data', production_tag])+'.root']
 
         print()
         print(config)
-        submit(config)
+        if not args.dry_run : 
+            submit(config)
+        else:
+            print('CRAB jobs created just for fun') 
 

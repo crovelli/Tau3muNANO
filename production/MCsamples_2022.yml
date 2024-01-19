@@ -1,22 +1,26 @@
 common:
   mc:
     splitting: 1
-    globaltag: 130X_mcRun3_2022_realistic_postEE_v6  
+    globaltag: 130X_mcRun3_2022_realistic_v5 
+    globaltagEE: 130X_mcRun3_2022_realistic_postEE_v6  
 
 samples:
   #
   #  MC
   #  
-  #  no reminiAOD for 2022 A,B,C,D,E (pre EE)
-  #WnuTau3Mu_2022:
-  #  dataset: /WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/Run3Summer22MiniAODv3-124X_mcRun3_2022_realistic_v12-v2/MINIAODSIM
-  #  isMC: True  
+  WnuTau3Mu_2022:
+    dataset: /WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2/MINIAODSIM 
+    isMC: True  
+    isEE: False
   WnuTau3Mu_2022EE:
     dataset: /WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM 
     isMC: True  
+    isEE: True 
   #DstoPhiPi_2022:
-  #  dataset: /DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22MiniAODv3-124X_mcRun3_2022_realistic_v12-v2/MINIAODSIM
+  #  dataset: /DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2/MINIAODSIM 
   #  isMC: True  
+  #  isEE: False 
   #DstoPhiPi_2022EE:
-  #  dataset: /DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22EEMiniAODv3-124X_mcRun3_2022_realistic_postEE_v1-v2/MINIAODSIM
+  #  dataset: /DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM 
   #  isMC: True  
+  #  isEE: True 
