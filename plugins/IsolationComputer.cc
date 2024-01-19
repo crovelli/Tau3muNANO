@@ -19,7 +19,9 @@ IsolationComputer::IsolationComputer(
     dBetaValue_ = dBetaValue;
     pT_treshold_ = pT_treshold;
 
-    const bool debug = false;    
+    muonsToVeto_.clear();
+    tracksToVeto_.clear();
+
     if(debug) std::cout << " [IsoComputer]> pT threshold " << pT_treshold << std::endl;
 
     // divide PF candidates in neutral / charged / PU-charged
@@ -41,13 +43,12 @@ IsolationComputer::IsolationComputer(
         }
     }// loop on PF candidates from miniAOD
 
-    //std::cout << "Found " << neutral_.size() << " neutral ptls " << std::endl;
-    //std::cout << "Found " << charged_.size() << " charged ptls w dz<0.2" << std::endl;
-    //std::cout << "Found " << pileup_.size()  << " charged-PU ptls in the iso-Cone" << std::endl;  
+    if(debug) std::cout << "Found " << neutral_.size() << " neutral ptls " << std::endl;
+    if(debug) std::cout << "Found " << charged_.size() << " charged ptls w dz<0.2" << std::endl;
+    if(debug) std::cout << "Found " << pileup_.size()  << " charged-PU ptls in the iso-Cone" << std::endl;  
 }// IsolationComputer()
 
 void IsolationComputer::addMuonsToVeto(const std::vector<edm::Ptr<pat::Muon>> inMuToVeto){
-    //std::vector<const edm::Ptr<pat::Muon>>::iterator it_mu;
     for (size_t it_mu = 0; it_mu < inMuToVeto.size(); ++it_mu){
         if(fabs(inMuToVeto[it_mu]->pdgId()) != 13) continue;
         muonsToVeto_.push_back(inMuToVeto[it_mu]);
@@ -55,6 +56,12 @@ void IsolationComputer::addMuonsToVeto(const std::vector<edm::Ptr<pat::Muon>> in
     
 }// addMuonsToVeto()
 
+void IsolationComputer::addTracksToVeto(const std::vector<edm::Ptr<pat::CompositeCandidate>> inTrkToVeto, const int& pdgID_trk){
+    for (size_t it_tk = 0; it_tk < inTrkToVeto.size(); ++it_tk){
+        if(fabs(inTrkToVeto[it_tk]->pdgId()) != pdgID_trk) continue;
+        tracksToVeto_.push_back(inTrkToVeto[it_tk]);
+    }
+}// addTracksToVeto()
 
 double IsolationComputer::pTcharged_iso(const reco::Candidate& tau_cand) const {
     double sum_pTcharge = 0;
@@ -64,9 +71,17 @@ double IsolationComputer::pTcharged_iso(const reco::Candidate& tau_cand) const {
         if( fabs((*ichargedIso)->pdgId())  == 13){
             std::vector<edm::Ptr<pat::Muon>>::const_iterator it_mu;
             for(it_mu = muonsToVeto_.begin(); it_mu != muonsToVeto_.end(); ++it_mu){
-                if(reco::deltaR(**ichargedIso, **it_mu) < DELTA_R_TOVETO) {
+                if(reco::deltaR(**ichargedIso, **it_mu) < DELTA_R_TOMATCH) {
                     to_veto = true;
-                    //std::cout << " xxx veto muon with pT " << (*it_mu)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
+                    if(debug) std::cout << " xxx veto muon with pT " << (*it_mu)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
+                }
+            }
+        }else{
+            std::vector<edm::Ptr<pat::CompositeCandidate>>::const_iterator it_tk;
+            for(it_tk = tracksToVeto_.begin(); it_tk != tracksToVeto_.end(); ++it_tk){
+                if(reco::deltaR(**ichargedIso, **it_tk) < DELTA_R_TOMATCH) {
+                    to_veto = true;
+                    if(debug) std::cout << " xxx veto track with pT " << (*it_tk)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
                 }
             }
         }

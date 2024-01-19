@@ -8,6 +8,7 @@
 typedef std::vector<pat::PackedCandidate> PackedCandidatesCollection;
 typedef std::vector<const pat::PackedCandidate *>::const_iterator IT;
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
 
 class IsolationComputer{
@@ -17,7 +18,7 @@ class IsolationComputer{
         edm::Handle<PackedCandidatesCollection>& inputPFcandiadtes, 
         const double isoRadius,
         const double isoRadiusForHLT,
-	const double MaxDZForHLT,
+        const double MaxDZForHLT,
         const double dZpv,
         const double dBetaCone,
         const double dBetaValue = 0.2,
@@ -33,8 +34,11 @@ class IsolationComputer{
 
     // veto muons in the candidate
     void addMuonsToVeto(const std::vector<edm::Ptr<pat::Muon>> inMuToVeto);
+    void addTracksToVeto(const std::vector<edm::Ptr<pat::CompositeCandidate>> inMuToVeto, const int& pdgID_trk = 211);
 
     private:
+
+    const bool debug = false;
 
     // PF candidates
     edm::Handle<PackedCandidatesCollection> PFcandCollection_ ;
@@ -51,7 +55,8 @@ class IsolationComputer{
 
     // to veto
     std::vector<edm::Ptr<pat::Muon>> muonsToVeto_;
-    const double DELTA_R_TOVETO = 0.0001;
+    std::vector<edm::Ptr<pat::CompositeCandidate>> tracksToVeto_;
+    const double DELTA_R_TOMATCH = 0.0001;
 
 };
 #endif

@@ -387,6 +387,7 @@ void DsPhiMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup
         const float iso_dZmax = 0.2; // cm
         IsolationComputer isoComputer = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, iso_dZmax, dBetaCone_,dBetaValue_, iso_pT_threshold);
         isoComputer.addMuonsToVeto({l1_ptr, l2_ptr});
+        isoComputer.addTracksToVeto({pi_ptr});
         float ptChargedFromPV = isoComputer.pTcharged_iso(Ds_cand);
         float ptChargedFromPU = isoComputer.pTcharged_PU(Ds_cand);
         float ptPhotons = isoComputer.pTphoton(Ds_cand);
@@ -398,6 +399,7 @@ void DsPhiMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup
         iso_pT_threshold = 0.5;
         IsolationComputer isoComputer_pT05 = IsolationComputer(pkdPFcand_hdl, isoRadius_, isoRadiusForHLT_, MaxDZForHLT_, iso_dZmax, dBetaCone_,dBetaValue_, iso_pT_threshold);
         isoComputer_pT05.addMuonsToVeto({l1_ptr, l2_ptr});
+        isoComputer_pT05.addTracksToVeto({pi_ptr});
         float ptChargedFromPV_pT05 = isoComputer_pT05.pTcharged_iso(Ds_cand);
         float ptChargedFromPU_pT05 = isoComputer_pT05.pTcharged_PU(Ds_cand);
         float ptPhotons_pT05 = isoComputer_pT05.pTphoton(Ds_cand);
