@@ -1,3 +1,6 @@
+#ifndef diMuonResonances_h
+#define diMuonResonances_h
+
 #include <iostream>
 #include <vector>
 
@@ -17,3 +20,5 @@ std::vector< std::pair<float, float> > resonancesToVeto{
 }; //resonancesToVeto
 
 constexpr int SIGMA_TO_EXCLUDE = 2;
+
+#endif

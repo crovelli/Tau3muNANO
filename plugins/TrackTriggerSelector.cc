@@ -223,7 +223,8 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
                   muObjNumberTM = hh;
                }
             }
-         }
+         }// loop on filters
+         
          if(debug && muObjNumberTM>=0) std::cout << "Loop over filters done, my TM filter found" << std::endl;
       
          // here HLT obj vs reco track candidates
@@ -332,12 +333,14 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
      // track candidate 
      pat::CompositeCandidate pcand;
      pcand.setP4(trk.p4());
+     pcand.setCharge(trk.charge());
      pcand.setVertex(trk.vertex());
      pcand.setPdgId(trk.pdgId());
      pcand.addUserInt("charge", trk.charge());
      pcand.addUserInt("nValidHits", trk.bestTrack()->found());
      pcand.addUserFloat("dZpv", trk.dz(PV.position()));
      pcand.addUserFloat("err_dZpv", trk.dzError());    
+     pcand.addUserInt("trackQuality", trk.trackHighPurity()); 
 
      // compatibility with BS, applied at HLT level
      float trkdr = fabs( (- (trk.vx()-beamSpot.x0()) * trk.py() + (trk.vy()-beamSpot.y0()) * trk.px() ) / trk.pt() );
