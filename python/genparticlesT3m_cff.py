@@ -10,7 +10,7 @@ finalGenParticlesT3m = finalGenParticles.clone(
   select = cms.vstring(
 	"drop *",
         "keep++ (abs(pdgId) == 24)",  #keep all W bosons + their daughters & granddaughters
-        "keep   (abs(pdgId) == 211)",  #keep all charged pions 
+        "keep++ (abs(pdgId) == 431)", #keep all Ds+ mesons with their daughters & granddaughters 
    )
 )
 
