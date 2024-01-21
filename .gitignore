@@ -4,6 +4,7 @@
 
 # CRAB report
 production/Tau3MuNano2022_*/*
+production/DsPhiMuMuPiNano_*/*
 
 # Multimedia
 *.pdf
