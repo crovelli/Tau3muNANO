@@ -16,7 +16,7 @@ config.General.workArea = 'Tau3MuNano2022_%s' % production_tag
 config.section_('Data')
 config.Data.publication = False
 # chiara: un-comment to store at cern     
-config.Data.outLFNDirBase = '/store/group/phys_bphys/cbasile/%s' % (config.General.workArea)
+# config.Data.outLFNDirBase = '/store/group/phys_bphys/cbasile/%s' % (config.General.workArea)
 # chiara: check on DAS the DBS
 config.Data.inputDBS = 'global'
 #config.Data.inputDBS = 'phys03'
@@ -29,10 +29,10 @@ config.JobType.allowUndistributedCMSSW = True
 config.section_('User')
 config.section_('Site')
 # chiara: un-comment to store at cern
-config.Site.storageSite = 'T2_CH_CERN'
-#
+#config.Site.storageSite = 'T2_CH_CERN'
+
 # chiara: un-comment to store at Rome
-#config.Site.storageSite = 'T2_IT_Rome'
+config.Site.storageSite = 'T2_IT_Rome'
 
 if __name__ == '__main__':
 

@@ -52,7 +52,7 @@ METfilters =[
         'Flag_ecalBadCalibFilter',
     ]
 
-METforWnuTau3Mu = cms.EDProducer('TauPlusMETBuilder',
+METforDsPhiPi = cms.EDProducer('TauPlusMETBuilder',
     src = cms.InputTag('DsPhiMuMuPiForTau3Mu', 'SelectedDs'),
     # input MET
     met = cms.InputTag('slimmedMETs'),
@@ -186,8 +186,8 @@ DsPhiMuMuPiTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
     )
 )
 
-TauPlusMetTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
-    src = cms.InputTag('METforWnuTau3Mu', 'builtWbosons'),
+DsPlusMetTable = cms.EDProducer('SimpleCompositeCandidateFlatTableProducer',
+    src = cms.InputTag('METforDsPhiPi', 'builtWbosons'),
     cut = cms.string(""),
     name = cms.string("DsPlusMET"),
     doc = cms.string("Tau+MET Variables"),
@@ -249,10 +249,11 @@ CountDsCand = cms.EDFilter("PATCandViewCountFilter",
 
 ########################### Sequencies  ############################
 
-DsPhiMuMuPiSequence = cms.Sequence(
-    (DsPhiMuMuPiForTau3Mu * CountDsCand)
-)
+#DsPhiMuMuPiSequence = cms.Sequence(
+#    (DsPhiMuMuPiForTau3Mu * CountDsCand)
+#)
+DsPhiMuMuPiSequence = cms.Sequence(DsPhiMuMuPiForTau3Mu)
 DsPhiMuMuPiTableSequence = cms.Sequence( DsPhiMuMuPiTable )
 
-TauPlusMetSequence = cms.Sequence( METforWnuTau3Mu )
-TauPlusMetTableSequence = cms.Sequence( TauPlusMetTable )
+DsPlusMetSequence = cms.Sequence( METforDsPhiPi )
+DsPlusMetTableSequence = cms.Sequence( DsPlusMetTable )

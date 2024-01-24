@@ -232,8 +232,11 @@ CountMuonTriplets = cms.EDFilter("PATCandViewCountFilter",
 
 ########################### Sequencies  ############################
 
+#Tau3MuSequence = cms.Sequence(
+#    (muonTripletForTau3Mu * CountMuonTriplets)
+#)
 Tau3MuSequence = cms.Sequence(
-    (muonTripletForTau3Mu * CountMuonTriplets)
+    muonTripletForTau3Mu
 )
 
 Tau3MuTableSequence = cms.Sequence( Tau3MuTable )

@@ -48,8 +48,7 @@ def nanoAOD_customizeTriggerBitsTau3Mu(process):
     return process
 
 def nanoAOD_customizeDsPhiMuMuPi(process):
-    process.nanoDsPhiMuMuPi = cms.Sequence( DsPhiMuMuPiSequence + DsPhiMuMuPiTableSequence + TauPlusMetSequence + TauPlusMetTableSequence)
-    #process.nanoDsPhiMuMuPi = cms.Sequence( DsPhiMuMuPiSequence + DsPhiMuMuPiTableSequence)
+    process.nanoDsPhiMuMuPi = cms.Sequence( (DsPhiMuMuPiSequence + DsPhiMuMuPiTableSequence + DsPlusMetSequence + DsPlusMetTableSequence)*CountDsCand)
     return process
 
 

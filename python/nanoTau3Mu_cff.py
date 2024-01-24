@@ -35,6 +35,10 @@ nanoSequence = cms.Sequence(nanoMetadata + #nanoSequenceCommon +
 nanoSequenceMC = cms.Sequence(particleLevelT3mSequence + genParticleT3mSequence + cms.Sequence(metMCTask) + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleT3mTables + lheInfoTable)
 
+#Tau3MuSequence = cms.Sequence(
+#    muonTripletForTau3Mu * DsPhiMuMuPiForTau3Mu * (CountDsCand+CountMuonTriplets)
+#)
+
 def nanoAOD_customizeMuonTriggerTau3Mu(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + muonT3mSequence + muonT3mTables)
     return process
@@ -48,8 +52,9 @@ def nanoAOD_customizeTriggerBitsTau3Mu(process):
     return process
 
 def nanoAOD_customizeWnuTau3Mu(process):
-    process.nanoWnuTau3MuSequence = cms.Sequence( Tau3MuSequence + Tau3MuTableSequence + TauPlusMetSequence + TauPlusMetTableSequence)
+    process.nanoWnuTau3MuSequence = cms.Sequence( (Tau3MuSequence + Tau3MuTableSequence + TauPlusMetSequence + TauPlusMetTableSequence) * CountMuonTriplets) 
     return process
+
 
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag

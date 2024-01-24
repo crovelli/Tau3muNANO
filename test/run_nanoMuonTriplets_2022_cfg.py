@@ -92,6 +92,7 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('PhysicsTools.Tau3muNANO.nanoTau3Mu_cff')
+process.load('PhysicsTools.Tau3muNANO.nanoDsPhiMuMuPi_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -109,7 +110,7 @@ process.source = cms.Source(
 )
 process.options = cms.untracked.PSet(
     #Rethrow 
-    SkipEvent = cms.untracked.vstring('ProductNotFound'),
+    #SkipEvent = cms.untracked.vstring('ProductNotFound'),
     wantSummary = cms.untracked.bool(options.wantSummary),
 )
 
@@ -145,13 +146,16 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.Tau3muNANO.nanoTau3Mu_cff import *
+from PhysicsTools.Tau3muNANO.nanoDsPhiMuMuPi_cff import *
 process = nanoAOD_customizeTrackTau3Mu(process)
 process = nanoAOD_customizeMuonTriggerTau3Mu(process)
 process = nanoAOD_customizeWnuTau3Mu(process)
+process = nanoAOD_customizeDsPhiMuMuPi(process)
 process = nanoAOD_customizeTriggerBitsTau3Mu(process)
 
 # Path and EndPath definitions
 process.nanoAOD_TauTo3mu_step = cms.Path(process.nanoSequence + process.nanoWnuTau3MuSequence )
+process.nanoAOD_DsPhiMuMuPi_step = cms.Path(process.nanoDsPhiMuMuPi )
 
 # customisation of the process.
 if options.isMC:
@@ -164,6 +168,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 # Schedule definition
 process.schedule = cms.Schedule(
                                 process.nanoAOD_TauTo3mu_step,
+                                process.nanoAOD_DsPhiMuMuPi_step,
                                 process.endjob_step,
                                 process.NANOAODoutput_step
                                )
@@ -173,7 +178,7 @@ associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
-                                   'nanoAOD_TauTo3mu_step'
+                                   'nanoAOD_TauTo3mu_step', 'nanoAOD_DsPhiMuMuPi_step'
                                    )
 )
 
