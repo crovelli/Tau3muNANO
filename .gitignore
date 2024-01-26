@@ -3,7 +3,7 @@
 *.log
 
 # CRAB report
-production/Tau3MuNano2022_*/*
+production/Tau3MuNano202*_*/*
 production/DsPhiMuMuPiNano_*/*
 
 # Multimedia
