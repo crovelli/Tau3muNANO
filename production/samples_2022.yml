@@ -49,7 +49,7 @@ samples:
     isMC: False
   #
   data_Run2022Gv1_4:    
-    dataset: /ParkingDoubleMuonLowMass4/Run2022G-22Sep2023-v1/MINIAOD
+    dataset: /ParkingDoubleMuonLowMass4/Run2022G-22Sep2023-v2/MINIAOD
     isMC: False
   #  
   data_Run2022Fv1_5:    
