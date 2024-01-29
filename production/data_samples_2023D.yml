@@ -11,35 +11,54 @@ samples:
   #
   #  DATA
   #  
-  #
-  data_Run2023D_0:    
+  # --- 2023D
+  # (v1)
+  data_Run2023Dv1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Dv1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  # (v2)
+  data_Run2023Dv2_0:    
     dataset: /ParkingDoubleMuonLowMass0/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
-  #
-  data_Run2023D_1:    
+  data_Run2023Dv2_1:    
     dataset: /ParkingDoubleMuonLowMass1/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
-  #
-  data_Run2023D_2:    
+  data_Run2023Dv2_2:    
     dataset: /ParkingDoubleMuonLowMass2/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
-  #
-  data_Run2023D_3:    
+  data_Run2023Dv2_3:    
     dataset: /ParkingDoubleMuonLowMass3/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
-  #
-  data_Run2023D_4:    
+  data_Run2023Dv2_4:    
     dataset: /ParkingDoubleMuonLowMass4/Run2023D-22Sep2023_v2-v2/MINIAOD
     isMC: False
-  #
-  data_Run2023D_5:    
+  data_Run2023Dv2_5:    
     dataset: /ParkingDoubleMuonLowMass5/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
-  #
-  data_Run2023D_6:    
+  data_Run2023Dv2_6:    
     dataset: /ParkingDoubleMuonLowMass6/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
-  #
-  data_Run2023D_7:    
+  data_Run2023Dv2_7:    
     dataset: /ParkingDoubleMuonLowMass7/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False

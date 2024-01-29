@@ -1,5 +1,5 @@
 import CRABClient
-from CRABClient.UserUtilities import config, ClientException, getUsernameFromCRIC
+from CRABClient.UserUtilities import config, ClientException#, getUsernameFromCRIC
 import yaml
 import datetime
 from fnmatch import fnmatch
@@ -16,7 +16,7 @@ config.General.workArea = 'Tau3MuNano2022_%s' % production_tag
 config.section_('Data')
 config.Data.publication = False
 # chiara: un-comment to store at cern     
-# config.Data.outLFNDirBase = '/store/group/phys_bphys/cbasile/%s' % (config.General.workArea)
+config.Data.outLFNDirBase = '/store/group/phys_bphys/cbasile/%s' % (config.General.workArea)
 # chiara: check on DAS the DBS
 config.Data.inputDBS = 'global'
 #config.Data.inputDBS = 'phys03'
