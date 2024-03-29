@@ -391,9 +391,11 @@ void DsPhiMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup
         float ptChargedFromPV = isoComputer.pTcharged_iso(Ds_cand);
         float ptChargedFromPU = isoComputer.pTcharged_PU(Ds_cand);
         float ptPhotons = isoComputer.pTphoton(Ds_cand);
+        float ptNeutral = isoComputer.pTneutral(Ds_cand);
         float ptChargedForHLT = isoComputer.pTchargedforhlt_iso(Ds_cand,fitted_vtx->position().z());
 
         float AbsIsolation = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
+        float AbsLepIsolation = ptChargedFromPV + std::max(0., ptPhotons + ptNeutral - dBetaValue_*ptChargedFromPU);
          
         //  --- set pT threshold for isolation = 0.5 GeV
         iso_pT_threshold = 0.5;
@@ -403,9 +405,11 @@ void DsPhiMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup
         float ptChargedFromPV_pT05 = isoComputer_pT05.pTcharged_iso(Ds_cand);
         float ptChargedFromPU_pT05 = isoComputer_pT05.pTcharged_PU(Ds_cand);
         float ptPhotons_pT05 = isoComputer_pT05.pTphoton(Ds_cand);
+        float ptNeutral_pT05 = isoComputer_pT05.pTneutral(Ds_cand);
         float ptChargedForHLT_pT05 = isoComputer_pT05.pTchargedforhlt_iso(Ds_cand,fitted_vtx->position().z());
 
         float AbsIsolation_pT05 = ptChargedFromPV_pT05 + std::max(0., ptPhotons_pT05 - dBetaValue_*ptChargedFromPU_pT05);
+        float AbsLepIsolation_pT05 = ptChargedFromPV_pT05 + std::max(0., ptPhotons_pT05 + ptNeutral_pT05 - dBetaValue_*ptChargedFromPU_pT05);
 
         // class initiated with outer beta cone radius (NOT WORKING!!)
         //heppy::IsolationComputer isoComputer = heppy::IsolationComputer(dBetaCone_);
@@ -578,14 +582,18 @@ void DsPhiMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup
         Ds_cand.addUserFloat("iso_ptChargedFromPV", ptChargedFromPV);
         Ds_cand.addUserFloat("iso_ptChargedFromPU", ptChargedFromPU);
         Ds_cand.addUserFloat("iso_ptPhotons", ptPhotons);
+        Ds_cand.addUserFloat("iso_ptNeutral", ptNeutral);
         Ds_cand.addUserFloat("iso_ptChargedForHLT", ptChargedForHLT);
         Ds_cand.addUserFloat("absIsolation",AbsIsolation);
+        Ds_cand.addUserFloat("absLepIsolation",AbsLepIsolation);
         // pT > 0.5 GeV
         Ds_cand.addUserFloat("iso_ptChargedFromPV_pT05", ptChargedFromPV_pT05);
         Ds_cand.addUserFloat("iso_ptChargedFromPU_pT05", ptChargedFromPU_pT05);
         Ds_cand.addUserFloat("iso_ptPhotons_pT05", ptPhotons_pT05);
+        Ds_cand.addUserFloat("iso_ptNeutral_pT05", ptNeutral_pT05);
         Ds_cand.addUserFloat("iso_ptChargedForHLT_pT05", ptChargedForHLT_pT05);
         Ds_cand.addUserFloat("absIsolation_pT05",AbsIsolation_pT05);
+        Ds_cand.addUserFloat("absLepIsolation_pT05",AbsLepIsolation_pT05);
 
         // useful quantities for BDT
         Ds_cand.addUserFloat("dZmu12", dz_mu12); 

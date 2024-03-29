@@ -315,9 +315,11 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         float ptChargedFromPV = isoComputer.pTcharged_iso(muon_triplet);
         float ptChargedFromPU = isoComputer.pTcharged_PU(muon_triplet);
         float ptPhotons = isoComputer.pTphoton(muon_triplet);
+        float ptNeutral = isoComputer.pTneutral(muon_triplet);
         float ptChargedForHLT = isoComputer.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
 
-        float TauAbsIsolation = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
+        float TauAbsIsolation    = ptChargedFromPV + std::max(0., ptPhotons - dBetaValue_*ptChargedFromPU);
+        float lepTauAbsIsolation = ptChargedFromPV + std::max(0., ptPhotons + ptNeutral - dBetaValue_*ptChargedFromPU);
          
         //  --- set pT threshold for isolation = 0.5 GeV
         iso_pT_threshold = 0.5;
@@ -326,19 +328,12 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         float ptChargedFromPV_pT05 = isoComputer_pT05.pTcharged_iso(muon_triplet);
         float ptChargedFromPU_pT05 = isoComputer_pT05.pTcharged_PU(muon_triplet);
         float ptPhotons_pT05 = isoComputer_pT05.pTphoton(muon_triplet);
+        float ptNeutral_pT05 = isoComputer_pT05.pTneutral(muon_triplet);
         float ptChargedForHLT_pT05 = isoComputer_pT05.pTchargedforhlt_iso(muon_triplet,fitted_vtx->position().z());
 
         float TauAbsIsolation_pT05 = ptChargedFromPV_pT05 + std::max(0., ptPhotons_pT05 - dBetaValue_*ptChargedFromPU_pT05);
+        float lepTauAbsIsolation_pT05 = ptChargedFromPV_pT05 + std::max(0., ptPhotons_pT05 + ptNeutral_pT05 - dBetaValue_*ptChargedFromPU_pT05);
 
-        // class initiated with outer beta cone radius (NOT WORKING!!)
-        //heppy::IsolationComputer isoComputer = heppy::IsolationComputer(dBetaCone_);
-        //isoComputer.setPackedCandidates(pkdPFcand, -1, 0.2, 9999, true); // std::vector<pat::PackedCandidate>, fromPV_thresh, dz_thresh, dxy_thresh, also_leptons
-        //float ptChargedFromPV = isoComputer.chargedAbsIso(muon_triplet, isoRadius_, 0., 0.5);
-        //float ptChargedFromPU = isoComputer.puAbsIso(muon_triplet, dBetaCone_, 0., 0.5);
-        //float ptPhotons       = isoComputer.photonAbsIsoRaw(muon_triplet, dBetaCone_, 0., 0.5);
-
-        // useful quantities for BDT
-        // muons longitudinal distance
         float dz_mu12 = ( (l1_ptr->hasUserFloat("dZpv") && l2_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l2_ptr->userFloat("dZpv")) : -1 );
         float dz_mu13 = ( (l1_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l1_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
         float dz_mu23 = ( (l2_ptr->hasUserFloat("dZpv") && l3_ptr->hasUserFloat("dZpv")) ? fabs(l2_ptr->userFloat("dZpv") - l3_ptr->userFloat("dZpv")) : -1 );
@@ -360,7 +355,7 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
       for (const std::string& path: HLTPaths_){
 	
 	if(debug) std::cout << "ipath = " << ipath << ", path = " << path << std::endl;
-	if(debug) std::cout << std::endl;
+   if(debug) std::cout << std::endl;
 	ipath++;
       
 	// Here we loop over trigger objects
@@ -436,23 +431,23 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
       } // Loop over HLT paths
       
       if(debug) {
-	std::cout << std::endl;
-	std::cout << "Summary for this reco tau: " << std::endl;
-	int size1 = frs.size();
-	int size2 = temp_DR.size();
-	if (size1!=size2) 
-	  std::cout << "problem with size: " << size1 << " " << size2 << std::endl;
-	else {
-	  std::cout << "size ok: " << size1 << std::endl;	
-	  for (int jj=0; jj<size1; jj++) std::cout << "fired = " << frs[jj] << ", dR = " << temp_DR[jj] << std::endl;
-	}					 
+         std::cout << std::endl;
+         std::cout << "Summary for this reco tau: " << std::endl;
+         int size1 = frs.size();
+         int size2 = temp_DR.size();
+         if (size1!=size2) 
+            std::cout << "problem with size: " << size1 << " " << size2 << std::endl;
+         else {
+            std::cout << "size ok: " << size1 << std::endl;	
+            for (int jj=0; jj<size1; jj++) std::cout << "fired = " << frs[jj] << ", dR = " << temp_DR[jj] << std::endl;
+         }					 
       } 
       
       int mytriggersize = frs.size();
       for (int jj=0; jj<mytriggersize; jj++) {
-	std::string namedr = HLTPaths_[jj]+"_dr";
-	muon_triplet.addUserInt(HLTPaths_[jj],frs[jj]);  
-	muon_triplet.addUserFloat(namedr,temp_DR[jj]); 
+         std::string namedr = HLTPaths_[jj]+"_dr";
+         muon_triplet.addUserInt(HLTPaths_[jj],frs[jj]);  
+         muon_triplet.addUserFloat(namedr,temp_DR[jj]); 
       }					 
       
       // HLT / offline match for last HLT filter - end
@@ -501,14 +496,18 @@ void TriMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         muon_triplet.addUserFloat("iso_ptChargedFromPV", ptChargedFromPV);
         muon_triplet.addUserFloat("iso_ptChargedFromPU", ptChargedFromPU);
         muon_triplet.addUserFloat("iso_ptPhotons", ptPhotons);
+        muon_triplet.addUserFloat("iso_ptNeutral", ptNeutral);
         muon_triplet.addUserFloat("iso_ptChargedForHLT", ptChargedForHLT);
         muon_triplet.addUserFloat("absIsolation",TauAbsIsolation);
+        muon_triplet.addUserFloat("absLepIsolation",lepTauAbsIsolation);
         // pT > 0.5 GeV
         muon_triplet.addUserFloat("iso_ptChargedFromPV_pT05", ptChargedFromPV_pT05);
         muon_triplet.addUserFloat("iso_ptChargedFromPU_pT05", ptChargedFromPU_pT05);
         muon_triplet.addUserFloat("iso_ptPhotons_pT05", ptPhotons_pT05);
+        muon_triplet.addUserFloat("iso_ptNeutral_pT05", ptNeutral_pT05);
         muon_triplet.addUserFloat("iso_ptChargedForHLT_pT05", ptChargedForHLT_pT05);
         muon_triplet.addUserFloat("absIsolation_pT05",TauAbsIsolation_pT05);
+        muon_triplet.addUserFloat("absLepIsolation_pT05",lepTauAbsIsolation_pT05);
 
         // useful quantities for BDT
         muon_triplet.addUserFloat("dZmu12", dz_mu12); 

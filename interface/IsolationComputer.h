@@ -30,6 +30,7 @@ class IsolationComputer{
     double pTcharged_iso(const reco::Candidate& tau_cand) const;
     double pTcharged_PU(const reco::Candidate& tau_cand) const;
     double pTphoton(const reco::Candidate& tau_cand) const;
+    double pTneutral(const reco::Candidate& tau_cand) const;
     double pTchargedforhlt_iso(const reco::Candidate& tau_cand, float tau_vz) const;
 
     // veto muons in the candidate
@@ -57,6 +58,11 @@ class IsolationComputer{
     std::vector<edm::Ptr<pat::Muon>> muonsToVeto_;
     std::vector<edm::Ptr<pat::CompositeCandidate>> tracksToVeto_;
     const double DELTA_R_TOMATCH = 0.0001;
+    const int    ElePDGid = 11; 
+    const int    MuonPDGid = 13; 
+    const int    GammaPDGid = 22; 
+    const int    ChargedPDGid = 211; 
+    const int    NeutralPDGid = 130; 
 
 };
 #endif

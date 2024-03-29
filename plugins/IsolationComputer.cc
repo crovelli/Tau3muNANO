@@ -26,21 +26,21 @@ IsolationComputer::IsolationComputer(
 
     // divide PF candidates in neutral / charged / PU-charged
     for(const pat::PackedCandidate &p : *PFcandCollection_){
-        if(p.charge() == 0){
-            neutral_.push_back(&p);
-        }else if (fabs(p.dz()) < dZpv){
-            charged_.push_back(&p);
-        }else{
-            pileup_.push_back(&p);
-        }
+       if(p.charge() == 0){
+          neutral_.push_back(&p);
+       }else if (fabs(p.dz()) < dZpv){
+          charged_.push_back(&p);
+       }else{
+          pileup_.push_back(&p);
+       }
     }// loop on PF candidates from miniAOD
 
     // all charged candidates for HLT emulation
     for(const pat::PackedCandidate &p : *PFcandCollection_){
-        if(p.charge() != 0){
-	  if (!p.trackHighPurity()) continue;
-	  chargedforhlt_.push_back(&p);
-        }
+       if(p.charge() != 0){
+          if (!p.trackHighPurity()) continue;
+          chargedforhlt_.push_back(&p);
+       }
     }// loop on PF candidates from miniAOD
 
     if(debug) std::cout << "Found " << neutral_.size() << " neutral ptls " << std::endl;
@@ -69,30 +69,52 @@ double IsolationComputer::pTcharged_iso(const reco::Candidate& tau_cand) const {
     for (IT ichargedIso = charged_.begin(); ichargedIso != charged_.end(); ++ichargedIso){
         if( (*ichargedIso)->pt() < pT_treshold_ || reco::deltaR(**ichargedIso, tau_cand) > isoRadius_ ) continue;
         if( fabs((*ichargedIso)->pdgId())  == 13){
-            std::vector<edm::Ptr<pat::Muon>>::const_iterator it_mu;
-            for(it_mu = muonsToVeto_.begin(); it_mu != muonsToVeto_.end(); ++it_mu){
-                if(reco::deltaR(**ichargedIso, **it_mu) < DELTA_R_TOMATCH) {
-                    to_veto = true;
-                    if(debug) std::cout << " xxx veto muon with pT " << (*it_mu)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
-                }
-            }
+           std::vector<edm::Ptr<pat::Muon>>::const_iterator it_mu;
+           for(it_mu = muonsToVeto_.begin(); it_mu != muonsToVeto_.end(); ++it_mu){
+              if(reco::deltaR(**ichargedIso, **it_mu) < DELTA_R_TOMATCH) {
+                 to_veto = true;
+                 if(debug) std::cout << " xxx veto muon with pT " << (*it_mu)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
+              }
+           }
         }else{
-            std::vector<edm::Ptr<pat::CompositeCandidate>>::const_iterator it_tk;
-            for(it_tk = tracksToVeto_.begin(); it_tk != tracksToVeto_.end(); ++it_tk){
-                if(reco::deltaR(**ichargedIso, **it_tk) < DELTA_R_TOMATCH) {
-                    to_veto = true;
-                    if(debug) std::cout << " xxx veto track with pT " << (*it_tk)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
-                }
-            }
+           std::vector<edm::Ptr<pat::CompositeCandidate>>::const_iterator it_tk;
+           for(it_tk = tracksToVeto_.begin(); it_tk != tracksToVeto_.end(); ++it_tk){
+              if(reco::deltaR(**ichargedIso, **it_tk) < DELTA_R_TOMATCH) {
+                 to_veto = true;
+                 if(debug) std::cout << " xxx veto track with pT " << (*it_tk)->pt() << " / track pT "<< (*ichargedIso)->pt() << std::endl;
+              }
+           }
         }
         if (!to_veto) sum_pTcharge += (*ichargedIso)->pt();
         to_veto = false;
     }
     // remove muons used to build the tau cand
-    //std::cout << " Tau cand has " << tau_cand.numberOfDaughters() << " source ptls" << std::endl;
-    //std::cout << " = charged pT = " << sum_pTcharge << std::endl;
+    if(debug){
+      std::cout << " Tau cand has " << tau_cand.numberOfDaughters() << " source ptls" << std::endl;
+      std::cout << " = charged pT = " << sum_pTcharge << std::endl;
+    }
     return sum_pTcharge;
 } //pTcharged_iso()
+
+double IsolationComputer::pTneutral(const reco::Candidate& tau_cand) const {
+   double sum_pTneutral = 0;
+   bool to_veto = false;
+   for (IT ineutralIso = neutral_.begin(); ineutralIso != neutral_.end(); ++ineutralIso){
+      if( (*ineutralIso)->pt() < pT_treshold_ || reco::deltaR(**ineutralIso, tau_cand) > isoRadius_ || fabs((*ineutralIso)->pdgId())  != NeutralPDGid) continue;
+      // track matchink one to veto?
+      std::vector<edm::Ptr<pat::CompositeCandidate>>::const_iterator it_tk;
+      //for(it_tk = tracksToVeto_.begin(); it_tk != tracksToVeto_.end(); ++it_tk){
+      for(const edm::Ptr<pat::CompositeCandidate> &it_tk : tracksToVeto_){
+         if(reco::deltaR(**ineutralIso, *it_tk) < DELTA_R_TOMATCH) {
+             if(debug) std::cout << " xxx veto track with pT " << it_tk->pt() << " / track pT "<< (*ineutralIso)->pt() << std::endl;
+             continue;
+         }
+      }//loop on trk to veto
+      sum_pTneutral+= (*ineutralIso)->pt();
+   }// loop on neutral track
+
+   return sum_pTneutral;
+}//pTneutral()
 
 double IsolationComputer::pTcharged_PU(const reco::Candidate& tau_cand) const{
     double sum_pTcharge_PU = 0;
