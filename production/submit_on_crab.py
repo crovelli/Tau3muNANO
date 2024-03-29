@@ -11,7 +11,7 @@ config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'Tau3MuNano2022_%s' % production_tag
+config.General.workArea = 'Tau3MuNano2023_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
@@ -29,10 +29,10 @@ config.JobType.allowUndistributedCMSSW = True
 config.section_('User')
 config.section_('Site')
 # chiara: un-comment to store at cern
-#config.Site.storageSite = 'T2_CH_CERN'
+config.Site.storageSite = 'T2_CH_CERN'
 
 # chiara: un-comment to store at Rome
-config.Site.storageSite = 'T2_IT_Rome'
+#config.Site.storageSite = 'T2_IT_Rome'
 
 if __name__ == '__main__':
 

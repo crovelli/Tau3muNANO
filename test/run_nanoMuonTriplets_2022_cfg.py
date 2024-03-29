@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('isMC', False,
+options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
@@ -39,9 +39,10 @@ options.register('skip', 0,
     "skip first N events"
 )
 
-#options.setDefault('maxEvents', -1)
+#options.setDefault('maxEvents', -1) 
 options.setDefault('maxEvents', 1000)
-tag = '2022_SV' if options.isPreECALleakage else '2022EE_TrackIN'
+tag = '2022_ppW3MuNu' if options.isPreECALleakage else '2022EE_ppW3MuNu'
+tag = '2023_postBPix'
 options.setDefault('tag', tag)
 options.parseArguments()
 
@@ -49,10 +50,14 @@ options.parseArguments()
 #    (!) december 2023 - reminiAOD for eras 
 # MC pre ECAL leakage  : 130X_mcRun3_2022_realistic_v5           
 # MC post ECAL leakage : 130X_mcRun3_2022_realistic_postEE_v6    
-# 2022 ABCDE ReReco    : 130X_dataRun3_v2                        # for the time being, not available in 130X for parking
+# 2022 ABCDE ReMini    : 130X_dataRun3_v2                        # for the time being, not available in 130X for parking
 # 2022 FG Prompt       : 130X_dataRun3_PromptAnalysis_v1
+# MC pre  BPix 2023    : 130X_mcRun3_2023_realistic_v14 
+# MC post BPix 2023    : 130X_mcRun3_2023_realistic_postBPix_v2 
+# 2023 CD ReMini       : 130X_dataRun3_PromptAnalysis_v1 
+ 
 if not options.isMC :
-    globaltag = '130X_dataRun3_PromptAnalysis_v1'
+    globaltag = '130X_mcRun3_2023_realistic_postBPix_v2'
  
 else :
     globaltag = '130X_mcRun3_2022_realistic_v5' if options.isPreECALleakage else '130X_mcRun3_2022_realistic_postEE_v6'
@@ -66,9 +71,14 @@ outputFileNANO = cms.untracked.string('_'.join(['tau3muNANO', extension[options.
 outputFileFEVT = cms.untracked.string('_'.join(['xFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles :
     if options.isMC :
+        # ppW3MuNu
+        #options.inputFiles = [] if options.isPreECALleakage else \
+        #                    ['file:/eos/user/c/cbasile/Tau3MuRun3/W3MuNu_SM_production/ppW3MuNu_T3M/CMSSW_13_0_13/src/production/AODSIM-MiniAODSIM_production/ppW3MuNu_Run3Summer22EEMiniAODsim.root']
         # signal channel
-        options.inputFiles = ['/store/mc/Run3Summer22MiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_v5-v2/2540000/956f1823-037d-4a9c-aa2f-50dcf5936f83.root'] if options.isPreECALleakage else \
-                            ['/store/mc/Run3Summer22EEMiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2530000/6965991a-4aea-4d25-84b9-82404f0d2b64.root']
+        # 2023 -post BPix
+        options.inputFiles = ['/store/mc/Run3Summer23BPixMiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/30000/637cfa58-2eb0-4f2a-b22e-d6f6297c5b0b.root']
+        #options.inputFiles = ['/store/mc/Run3Summer22MiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_v5-v2/2540000/956f1823-037d-4a9c-aa2f-50dcf5936f83.root'] if options.isPreECALleakage else \
+        #                    ['/store/mc/Run3Summer22EEMiniAODv4/WtoTauNu_Tauto3Mu_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2530000/6965991a-4aea-4d25-84b9-82404f0d2b64.root']
         # control channel
         #options.inputFiles = ['/store/mc/Run3Summer22MiniAODv3/DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_v12-v2/2810000/0da9edba-f8b9-4e0c-8be1-282cdd2b5685.root'] if options.isPreECALleakage else \
         #                     ['/store/mc/Run3Summer22EEMiniAODv3/DstoPhiPi_Phito2Mu_MuFilter_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2810000/00589525-be33-4abd-af78-428bb9ace158.root']

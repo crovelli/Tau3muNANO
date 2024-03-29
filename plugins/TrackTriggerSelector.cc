@@ -227,14 +227,14 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
          
          if(debug && muObjNumberTM>=0) std::cout << "Loop over filters done, my TM filter found" << std::endl;
       
-         // here HLT obj vs reco track candidates
-         TVector3 trkTV3, objTV3;
-         trkTV3.SetPtEtaPhi( trk.pt(), trk.eta(), trk.phi() );
-         objTV3.SetPtEtaPhi( obj.pt(), obj.eta(), obj.phi() );
-         Float_t deltaR = fabs(trkTV3.DeltaR(objTV3));
     
          // here HLT-trk candidates
          if (muObjNumberTM>=0) {  
+            // here HLT obj vs reco track candidates
+            TVector3 trkTV3, objTV3;
+            trkTV3.SetPtEtaPhi( trk.pt(), trk.eta(), trk.phi() );
+            objTV3.SetPtEtaPhi( obj.pt(), obj.eta(), obj.phi() );
+            Float_t deltaR = fabs(trkTV3.DeltaR(objTV3));
             if(debug) std::cout << "DeltaR = " << deltaR << std::endl;
             if(debug) std::cout << "This is a tracker muon HLT candidate" << endl;
             if(deltaR < drForTriggerMatch_){    
