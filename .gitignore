@@ -3,7 +3,7 @@
 *.log
 
 # CRAB report
-production/Tau3MuNano202*_*/*
+production/Tau3MuNano*_*/*
 production/DsPhiMuMuPiNano_*/*
 
 # Multimedia
