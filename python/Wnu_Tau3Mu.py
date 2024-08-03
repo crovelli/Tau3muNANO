@@ -18,9 +18,9 @@ muonTripletForTau3Mu = cms.EDProducer('TriMuonBuilder',
     bits                = cms.InputTag("TriggerResults","","HLT"), 
     objects             = cms.InputTag("slimmedPatTrigger"),                                         
     # selection definition
-    lep1Selection   = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
-    lep2Selection   = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
-    lep3Selection   = cms.string('isMediumMuon && ((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
+    lep1Selection   = cms.string('((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
+    lep2Selection   = cms.string('((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
+    lep3Selection   = cms.string('((abs(eta) <= 1.2 && pt > 3.5) || (abs(eta) > 1.2 && abs(eta) < 2.4 && pt > 2.0))'),
     preVtxSelection = cms.string('mass() < 3 && abs(charge()) == 1'), # selection for tau candidates pre-fit
     postVtxSelection= cms.string('userInt("vtx_isValid")'),
     # trigger
