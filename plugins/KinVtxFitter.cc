@@ -20,8 +20,13 @@ KinVtxFitter::KinVtxFitter(const std::vector<reco::TransientTrack> tracks,
   }
 
   KinematicParticleVertexFitter kcv_fitter;    
-  RefCountedKinematicTree vtx_tree = kcv_fitter.fit(particles);
-
+  RefCountedKinematicTree vtx_tree;
+  try {
+    vtx_tree = kcv_fitter.fit(particles);
+  } catch( VertexException& e ) {
+    success_ = false;
+    return;
+  }
   if (vtx_tree->isEmpty() || !vtx_tree->isValid() || !vtx_tree->isConsistent()) {
     success_ = false; 
     return;

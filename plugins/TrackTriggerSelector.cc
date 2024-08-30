@@ -148,7 +148,8 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
 
   for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
     const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*tracks)[iTrk] : (*lostTracks)[iTrk-nTracks];
-
+    // check for NaNs in track kinematics
+    if (TMath::IsNaN(trk.pt()) || TMath::IsNaN(trk.eta()) || TMath::IsNaN(trk.phi())) continue;
     // arranging cuts for speed 
     if (!trk.hasTrackDetails())  continue;    
     if (abs(trk.pdgId()) != 211) continue; 
@@ -194,6 +195,8 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
       for (pat::TriggerObjectStandAlone obj : *triggerObjects) {
       
          if(debug) std::cout << "New object" << std::endl;
+         // check for NaNs in trigger object kinematics
+         if (TMath::IsNaN(obj.pt()) || TMath::IsNaN(obj.eta()) || TMath::IsNaN(obj.phi())) continue;
 
          // consider only objects which match the ref path    
          obj.unpackPathNames(trigNames);
