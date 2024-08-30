@@ -5,6 +5,7 @@
 # CRAB report
 production/Tau3MuNano*_*/*
 production/DsPhiMuMuPiNano_*/*
+*.csv
 
 # Multimedia
 *.pdf
