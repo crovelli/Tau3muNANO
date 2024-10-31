@@ -9,8 +9,8 @@ ssh -Y cbasile@lxplus8.cern.ch
 ## Getting started
 
 ```shell
-cmsrel CMSSW_13_0_13
-cd CMSSW_13_0_13/src
+cmsrel CMSSW_14_0_16 
+cd CMSSW_14_0_16/src
 cmsenv
 git cms-init
 ```
