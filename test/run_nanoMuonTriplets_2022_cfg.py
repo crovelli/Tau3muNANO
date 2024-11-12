@@ -5,17 +5,17 @@ import FWCore.ParameterSet.Config as cms
 ##               ##
 options = VarParsing('python')
 
-options.register('isMC', True,
+options.register('isMC', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
 )
-options.register('Era','2022postEE',
+options.register('Era','2024prompt',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
-    "Set data taking period : 2022preEE, 2022postEE, 2023preBPix, 2023postBPix"
+    "Set data taking period : 2022preEE, 2022postEE, 2023preBPix, 2023postBPix, 2024prompt"
 )
-options.register('physProcess','ppW3MuNu',
+options.register('physProcess','tau3mu',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Set the phys process : tau3mu, DsPhiPi, ppW3MuNu"
@@ -47,8 +47,8 @@ options.register('skip', 0,
 )
 
 # set number of events
-options.setDefault('maxEvents', -1) 
-#options.setDefault('maxEvents', 1000)
+#options.setDefault('maxEvents', -1) 
+options.setDefault('maxEvents', 100)
 # set physic process
 if not options.physProcess :
     phys_process = 'tau3mu'
@@ -69,12 +69,14 @@ global_tags_mc = {
     '2022postEE'    : '130X_mcRun3_2022_realistic_postEE_v6',
     '2023preBPix'   : '130X_mcRun3_2023_realistic_v14',
     '2023postBPix'  : '130X_mcRun3_2023_realistic_postBPix_v2',
+    '2024prompt'    : '', #era BCDE
 }
 global_tags_data = {
     '2022preEE'     : '124X_dataRun3_PromptAnalysis_v1', #era CD use '124X_dataRun3_Prompt_v10' for era E
     '2022postEE'    : '130X_dataRun3_PromptAnalysis_v1', #era FG
     '2023preBPix'   : '130X_dataRun3_PromptAnalysis_v1', #era BC
     '2023postBPix'  : '130X_dataRun3_PromptAnalysis_v1', #era D
+    '2024prompt'    : '140X_dataRun3_Prompt_v2',
 }
  
 if options._beenSet['globalTag']:
@@ -117,6 +119,7 @@ test_data_inFiles_era = {
                     ], #era FG
     '2023preBPix'   : [], #era BC
     '2023postBPix'  : [], #era D
+    '2024prompt'    : ['/store/data/Run2024C/ParkingDoubleMuonLowMass0/MINIAOD/PromptReco-v1/000/379/416/00000/0134a8bc-c8d4-400e-9508-2a4b222c5431.root'],
 }
 ##                ##
 #  DEFINE INPUTS   #  

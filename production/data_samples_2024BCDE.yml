@@ -1,0 +1,145 @@
+common:
+  data:
+    lumimask : https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions24/Cert_Collisions2024_378981_386951_Golden.json
+    splitting: 20
+    globaltag: 140X_dataRun3_Prompt_v2
+  mc:
+    splitting: 1
+    globaltag: 
+
+samples:
+  #
+  #  DATA
+  #  
+  #
+  # --- 2024 B
+  data_Run2024Bv1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Bv1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2024B-PromptReco-v1/MINIAOD
+    isMC: False 
+
+# --- 2024 C
+  data_Run2024Cv1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Cv1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2024C-PromptReco-v1/MINIAOD
+    isMC: False 
+
+# --- 2024 D
+  data_Run2024Dv1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Dv1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2024D-PromptReco-v1/MINIAOD
+    isMC: False 
+
+# --- 2024 E
+  data_Run2024Ev1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2024Ev1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2024E-PromptReco-v1/MINIAOD
+    isMC: False     

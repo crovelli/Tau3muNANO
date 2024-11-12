@@ -323,7 +323,6 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
         for (unsigned int i = 0; i < imutmp.numberOfSourceCandidatePtrs(); ++i) {
            if (! ((imutmp.sourceCandidatePtr(i)).isNonnull() && 
                     (imutmp.sourceCandidatePtr(i)).isAvailable()))   continue;
-
            const edm::Ptr<reco::Candidate> & source = imutmp.sourceCandidatePtr(i);
            if (source.id() == tracks.id() && source.key() == iTrk){
               if (imutmp.isMediumMuon())  matchedToMediumMuon  = 1;
@@ -344,6 +343,10 @@ void TrackTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm:
      pcand.addUserFloat("dZpv", trk.dz(PV.position()));
      pcand.addUserFloat("err_dZpv", trk.dzError());    
      pcand.addUserInt("trackQuality", trk.trackHighPurity()); 
+
+     std::cout << "[DEBUG] -- TrackTriggerSelector -- " << std::endl;
+     std::cout << "  track.pt() = " << pcand.pt() << std::endl;
+     std::cout << "  track.userFloat('dZpv') = " << pcand.userFloat("dZpv") << std::endl;
 
      // compatibility with BS, applied at HLT level
      float trkdr = fabs( (- (trk.vx()-beamSpot.x0()) * trk.py() + (trk.vy()-beamSpot.y0()) * trk.px() ) / trk.pt() );
