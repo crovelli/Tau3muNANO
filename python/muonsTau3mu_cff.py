@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.Tau3muNANO.common_cff import *
 from PhysicsTools.Tau3muNANO.HLTpathsT3m_cff import Path_Tau3Mu2022
+from PhysicsTools.NanoAOD.simplePATMuonFlatTableProducer_cfi import simplePATMuonFlatTableProducer
 
 Path2022=["HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15_Charge1","HLT_Tau3Mu_Mu7_Mu1_TkMu1_IsoTau15","HLT_DoubleMu4_3_LowMass"]
 Path= Path_Tau3Mu2022
@@ -31,14 +32,11 @@ countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
 )
 
 # muons selection
-muonT3mTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+muonT3mTable = simplePATMuonFlatTableProducer.clone(
     src = cms.InputTag("triMuonTrgSelector:SelectedMuons"),
-    cut = cms.string(""), 
     name = cms.string("Muon"),
     doc  = cms.string("slimmedMuons for Tau3mu analysis after basic selection"),
-    singleton = cms.bool(False),         
-    extension = cms.bool(False),         
-    variables = cms.PSet(PTVars, 
+    variables = cms.PSet(CandVars, 
         isPFcand = Var("userInt('isPFcand')",bool,doc="muon is global muon"),
         isGlobal = Var("userInt('isGlobal')",bool,doc="muon is global muon"),
         isLoose  = Var("userInt('isLoose')",bool,doc="muon is loose muon"),
@@ -48,8 +46,6 @@ muonT3mTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         isTight  = Var("userInt('isTight')",bool,doc="muon is tight muon"),
         isTight_BS = uint('isTight_BS'),
         isTracker= Var("userInt('isTracker')",bool,doc="muon is tight muon"),
-        
-        charge = Var("userInt('charge')",int,doc="charge"),
         trackQuality = Var("userInt('trackQuality')",int,doc="trackQuality"),
         z = Var("userFloat('z')",float,doc="track z coordinate"),
         dZpv = Var("userFloat('dZpv')",float,doc="long distance from PV"),
